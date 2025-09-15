@@ -1,11 +1,16 @@
 from fastapi import FastAPI
 from app.api.v1 import workouts
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="AI Fitness Tracker",
     version="0.1.0",
     description="Backend API for fitness tracker app"
 )
+
+origins = [
+    "http://localhost:5173",  # Vite frontend
+]
 
 # Root endpoint
 @app.get("/")
@@ -19,3 +24,10 @@ def health_check():
 
 # Include routers
 app.include_router(workouts.router, prefix="/api/v1/workouts", tags=["workouts"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
