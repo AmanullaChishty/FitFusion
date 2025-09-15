@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from typing import Optional
 
-class WorkoutCreate(BaseModel):
-    exercise: str
+class Workout(BaseModel):
+    id: int
+    name: str
     sets: int
     reps: int
-    weight: float | None = None
 
-class WorkoutResponse(WorkoutCreate):
-    id: int
+class WorkoutResponse(Workout):
+    description: Optional[str] = None

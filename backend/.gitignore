@@ -1,0 +1,41 @@
+# Python cache / build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE / editor settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+*.env
+
+# Logs
+*.log
+
+# Coverage / testing
+htmlcov/
+.tox/
+.coverage
+.cache/
+.pytest_cache/
+
+# FastAPI specific
+*.db   # if you use SQLite locally

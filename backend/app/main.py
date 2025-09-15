@@ -1,15 +1,21 @@
 from fastapi import FastAPI
-from app.api import auth, workouts, meals, progress
-from app.core.config import settings
+from app.api.v1 import workouts
 
-app = FastAPI(title="AI Fitness Tracker")
+app = FastAPI(
+    title="AI Fitness Tracker",
+    version="0.1.0",
+    description="Backend API for fitness tracker app"
+)
 
-# Register routers
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(workouts.router, prefix="/workouts", tags=["workouts"])
-app.include_router(meals.router, prefix="/meals", tags=["meals"])
-app.include_router(progress.router, prefix="/progress", tags=["progress"])
-
+# Root endpoint
 @app.get("/")
 def root():
-    return {"message": "Welcome to FIT Fusion"}
+    return {"message": "Welcome to the AI Fitness Tracker API 🚀"}
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "Backend is running!"}
+
+# Include routers
+app.include_router(workouts.router, prefix="/api/v1/workouts", tags=["workouts"])
