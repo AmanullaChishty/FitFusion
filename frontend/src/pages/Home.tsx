@@ -6,6 +6,7 @@ interface Workout {
   name: string;
   sets: number;
   reps: number;
+  description: string;
 }
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
     const fetchWorkouts = async () => {
       try {
         const res = await api.get("/api/v1/workouts");
+        console.log("API Response:", res.data);
         setWorkouts(res.data);
       } catch (err) {
         console.error("Error fetching workouts:", err);
@@ -27,10 +29,11 @@ export default function Home() {
     fetchWorkouts();
   }, []);
 
+  
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold mb-6 text-indigo-600">
-        Fitness Tracker 🏋️
+        Fit Fusion
       </h1>
 
       {loading ? (
@@ -45,6 +48,9 @@ export default function Home() {
               <h2 className="text-xl font-semibold text-gray-800">{workout.name}</h2>
               <p className="text-gray-600">
                 {workout.sets} sets × {workout.reps} reps
+              </p>
+              <p className="text-gray-600">
+                Description - {workout.description || "No description available."}
               </p>
             </div>
           ))}

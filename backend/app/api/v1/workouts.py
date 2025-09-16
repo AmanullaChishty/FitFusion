@@ -5,7 +5,7 @@ from typing import List
 
 router = APIRouter()
 
-@router.get("/", response_model=List[WorkoutResponse])
+@router.get("", response_model=List[WorkoutResponse])
 def list_workouts():
     """
     Get a list of workouts (mock data for now).

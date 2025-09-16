@@ -10,6 +10,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",  # Vite frontend
+    "https://*.app.github.dev",  # ✅ allow Codespaces frontend
 ]
 
 # Root endpoint
@@ -26,7 +27,8 @@ def health_check():
 app.include_router(workouts.router, prefix="/api/v1/workouts", tags=["workouts"])
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,          # only Codespaces domains
+    allow_origin_regex="https://.*\.app\.github\.dev",  # safer: regex allow
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
