@@ -1,16 +1,15 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./components/auth/Login";
+import Signup from "./components/auth/Signup";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
 
-export default function App() {
+function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        {/* Public */}
         <Route path="/login" element={<Login />} />
-
-        {/* Protected */}
+        <Route path="/signup" element={<Signup />} />
         <Route
           path="/dashboard"
           element={
@@ -19,10 +18,11 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         {/* Default redirect */}
         <Route path="*" element={<Login />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
+
+export default App;

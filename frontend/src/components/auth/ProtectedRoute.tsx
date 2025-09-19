@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import type { JSX } from "react";
 
 interface ProtectedRouteProps {
@@ -12,7 +12,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (loading) return <p>Loading...</p>;
 
   // If no user, redirect to login
-  if (!user) return <Navigate to="/login" replace />;
-
-  return children;
+  return user ? children : <Navigate to="/login" replace />;
 }

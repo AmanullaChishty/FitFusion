@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from app.api.v1 import workouts
+from app.api.routes import workouts
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="AI Fitness Tracker",
+    title="AI Fit Fusion",
     version="0.1.0",
-    description="Backend API for fitness tracker app"
+    description="Backend API for Fit Fusion app"
 )
 
 origins = [
@@ -16,7 +16,7 @@ origins = [
 # Root endpoint
 @app.get("/")
 def root():
-    return {"message": "Welcome to the AI Fitness Tracker API 🚀"}
+    return {"message": "Welcome to the AI Fit Fusion API 🚀"}
 
 # Health check endpoint
 @app.get("/health")
@@ -24,11 +24,11 @@ def health_check():
     return {"status": "ok", "message": "Backend is running!"}
 
 # Include routers
-app.include_router(workouts.router, prefix="/api/v1/workouts", tags=["workouts"])
+app.include_router(workouts.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains
-    allow_origin_regex="https://.*\.app\.github\.dev",  # safer: regex allow
+    allow_origin_regex=r"https://.*\.app\.github\.dev",  # safer: regex allow
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
