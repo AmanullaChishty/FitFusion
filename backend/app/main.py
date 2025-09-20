@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import workouts
+from app.api.routes import workouts,recommendations
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -25,6 +25,7 @@ def health_check():
 
 # Include routers
 app.include_router(workouts.router)
+app.include_router(recommendations.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains

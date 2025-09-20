@@ -1,37 +1,31 @@
-"""
-AI service placeholder for progressive overload suggestions.
+# backend/ai/recommender.py
 
-Later, this can be replaced with a real ML/LLM model that
-analyzes workout history trends.
-"""
+from typing import List, Dict
 
-from typing import Dict
-
-def suggest_progressive_overload(last_workout: Dict) -> Dict:
+def generate_recommendations(workouts: List[Dict]) -> List[Dict]:
     """
-    Suggests how to progress based on the last workout.
-    Simple rule-based placeholder:
-    - If user completed all sets & reps easily, increase weight.
-    - Otherwise, keep the same load.
-
-    Args:
-        last_workout (Dict): Example
-            {
-              "exercise": "Bench Press",
-              "sets": 3,
-              "reps": 10,
-              "weight": 40,
-              "completed": True
-            }
-
-    Returns:
-        Dict: Suggestion
+    Placeholder recommendation logic.
+    For now, it just suggests +2.5kg if a user has logged 3+ consistent sessions of the same exercise.
     """
-    suggestion = last_workout.copy()
-    if last_workout.get("completed", False):
-        suggestion["weight"] = (last_workout.get("weight") or 0) + 2.5
-        suggestion["note"] = "Increase weight slightly."
-    else:
-        suggestion["note"] = "Repeat same weight until all sets completed."
+    recommendations = []
+    exercise_counts = {}
 
-    return suggestion
+    for w in workouts:
+        exercise = w.get("exercise")
+        if not exercise:
+            continue
+        exercise_counts[exercise] = exercise_counts.get(exercise, 0) + 1
+
+    for exercise, count in exercise_counts.items():
+        if count >= 3:
+            recommendations.append({
+                "exercise": exercise,
+                "suggestion": f"Increase weight by +2.5kg for {exercise}",
+            })
+        else:
+            recommendations.append({
+                "exercise": exercise,
+                "suggestion": f"Stay consistent with {exercise}",
+            })
+
+    return recommendations
