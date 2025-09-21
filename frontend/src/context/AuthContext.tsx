@@ -4,6 +4,7 @@ import supabase from "../services/supabase"
 type AuthContextType = {
   user: any;
   session: any;
+  setSession: React.Dispatch<React.SetStateAction<any>>;
   loading: boolean;
   signOut: () => Promise<void>;
 };
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, setSession, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
