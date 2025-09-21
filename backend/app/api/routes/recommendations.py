@@ -1,7 +1,7 @@
 # backend/routers/recommendations.py
 
 from fastapi import APIRouter, Depends, HTTPException
-from app.services import fetch_workouts
+from app.services.workout_service import fetch_workouts
 from app.core.auth import get_current_user
 from app.ai.recommender import generate_recommendations
 

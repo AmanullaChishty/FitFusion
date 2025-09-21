@@ -5,10 +5,14 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
+    setLoading(false);
     if (error) setError(error.message);
     else alert("Check your email for confirmation link");
   };
@@ -33,8 +37,8 @@ export default function Signup() {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-        Sign Up
+      <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={loading}>
+        {loading ? 'Signing up...' : 'Sign Up'}
       </button>
     </form>
   );

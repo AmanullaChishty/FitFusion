@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import workouts,recommendations
+from app.api.routes import workouts,recommendations,auth
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -9,6 +9,7 @@ app = FastAPI(
 )
 
 origins = [
+    "http://localhost:3000",
     "http://localhost:5173",  # Vite frontend
     "https://*.app.github.dev",  # ✅ allow Codespaces frontend
 ]
@@ -26,6 +27,7 @@ def health_check():
 # Include routers
 app.include_router(workouts.router)
 app.include_router(recommendations.router)
+app.include_router(auth.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains
