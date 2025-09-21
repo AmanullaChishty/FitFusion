@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import workouts,recommendations,auth
+from app.api.routes import workouts,recommendations,auth,profile
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -25,9 +25,10 @@ def health_check():
     return {"status": "ok", "message": "Backend is running!"}
 
 # Include routers
-app.include_router(workouts.router)
-app.include_router(recommendations.router)
-app.include_router(auth.router)
+app.include_router(workouts.router, prefix="/api", tags=["workouts"])
+app.include_router(recommendations.router, prefix="/api", tags=["recommendations"])
+app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains

@@ -1,10 +1,8 @@
 # backend/app/services/workout_service.py
 from supabase import create_client, Client
 from app.core.config import settings
-from typing import List, Dict, Any
-
-# Create Supabase client
-supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+from typing import List, Dict, Any, Optional
+from app.services.supabase_client import supabase
 
 async def insert_workout(user_id: str, workout_data: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -26,3 +24,23 @@ async def fetch_workouts(user_id: str) -> List[Dict[str, Any]]:
     if response.error:
         raise Exception(f"Supabase fetch error: {response.error}")
     return response.data or []
+
+async def update_workout(workout_id: str, user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Update a workout for a specific user.
+    Only updates fields provided in update_data.
+    """
+    if not update_data:
+        return None
+
+    response = (
+        supabase.table("workouts")
+        .update(update_data)
+        .eq("id", workout_id)
+        .eq("user_id", user_id)  # ensure users can only update their own workouts
+        .execute()
+    )
+
+    if response.error:
+        raise Exception(f"Supabase update error: {response.error}")
+    return response.data[0] if response.data else None

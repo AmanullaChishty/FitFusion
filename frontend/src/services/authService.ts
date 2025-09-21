@@ -16,7 +16,7 @@ export async function verifyAuth() {
 
   const token = session.access_token;
 
-  const response = await fetch(`${API_BASE_URL}/auth/test`, {
+  const response = await fetch(`${API_BASE_URL}/api/auth/test`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

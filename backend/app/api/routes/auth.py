@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Header
-from app.services.workout_service import supabase
+from app.services.supabase_client import supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

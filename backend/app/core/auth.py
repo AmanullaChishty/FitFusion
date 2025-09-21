@@ -38,5 +38,9 @@ def get_current_user(token: str = Depends(security)):
             audience=settings.SUPABASE_URL,
         )
         return {"id": payload["sub"], "email": payload.get("email")}
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")

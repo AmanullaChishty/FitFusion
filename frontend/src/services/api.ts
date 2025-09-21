@@ -15,7 +15,7 @@ export interface Recommendation {
 }
 
 export const fetchWorkouts = async (token: string): Promise<Workout[]> => {
-  const res = await axios.get<Workout[]>(`${API_URL}/workouts`, {
+  const res = await axios.get<Workout[]>(`${API_URL}/api/workouts`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -25,7 +25,7 @@ export const fetchRecommendations = async (
   token: string
 ): Promise<{ user_id: string; recommendations: Recommendation[] }> => {
   const res = await axios.get<{ user_id: string; recommendations: Recommendation[] }>(
-    `${API_URL}/recommendations`,
+    `${API_URL}/api/recommendations`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
