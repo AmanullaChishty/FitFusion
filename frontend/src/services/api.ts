@@ -14,6 +14,14 @@ export interface Recommendation {
   suggestion: string;
 }
 
+export interface Profile {
+  username?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  [key: string]: any;
+}
+
 export const fetchWorkouts = async (token: string): Promise<Workout[]> => {
   const res = await axios.get<Workout[]>(`${API_URL}/api/workouts`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -30,6 +38,20 @@ export const fetchRecommendations = async (
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  return res.data;
+};
+
+export const fetchProfile = async (token: string): Promise<Profile> => {
+  const res = await axios.get<Profile>(`${API_URL}/api/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const updateProfile = async (token: string, profile: Profile): Promise<Profile> => {
+  const res = await axios.put<Profile>(`${API_URL}/api/profile`, profile, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return res.data;
 };
 

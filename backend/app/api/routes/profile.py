@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/profile", response_model=ProfileResponse)
 async def get_profile(user_id: str = Depends(get_current_user)):
     """Fetch user profile from Supabase users table."""
-    response = supabase.table("users").select("*").eq("id", user_id).single().execute()
+    response = supabase.table("users").select("*").eq("id", user_id["id"]).single().execute()
     if response.data is None:
         raise HTTPException(status_code=404, detail="Profile not found")
     return response.data
