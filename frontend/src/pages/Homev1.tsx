@@ -17,7 +17,6 @@ export default function Home() {
     const fetchWorkouts = async () => {
       try {
         const res = await api.get("/api/v1/workouts");
-        console.log("API Response:", res.data);
         setWorkouts(res.data);
       } catch (err) {
         console.error("Error fetching workouts:", err);

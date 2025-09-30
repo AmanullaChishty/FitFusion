@@ -28,6 +28,20 @@ async def get_workouts(user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/{workout_id}", response_model=WorkoutResponse)
+async def get_workout(workout_id: str, user: dict = Depends(get_current_user)):
+    """
+    Fetch a single workout by ID for the authenticated user.
+    """
+    try:
+        workout = await workout_service.fetch_workout(workout_id, user["id"])
+        if not workout:
+            raise HTTPException(status_code=404, detail="Workout not found")
+        return workout
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{workout_id}", response_model=WorkoutResponse)
 async def update_workout(workout_id: str, workout: WorkoutUpdate, user: dict = Depends(get_current_user)):
@@ -36,5 +50,20 @@ async def update_workout(workout_id: str, workout: WorkoutUpdate, user: dict = D
     """
     try:
         return await workout_service.update_workout(workout_id, user["id"], workout.dict(exclude_unset=True))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_workout(workout_id: str, user: dict = Depends(get_current_user)):
+    """
+    Delete a workout owned by the authenticated user.
+    """
+    try:
+        deleted = await workout_service.delete_workout(workout_id, user["id"])
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Workout not found")
+        return
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
