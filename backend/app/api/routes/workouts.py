@@ -12,8 +12,10 @@ async def log_workout(workout: WorkoutCreate, user: dict = Depends(get_current_u
     """
     Log a new workout for the authenticated user.
     """
+    print("Logging workout for user:", user)
+    print("Workout data:", workout.model_dump())
     try:
-        return await workout_service.insert_workout(user["id"], workout.dict())
+        return await workout_service.insert_workout(user["id"], workout.model_dump())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -23,6 +25,7 @@ async def get_workouts(user: dict = Depends(get_current_user)):
     """
     Fetch all workouts for the authenticated user.
     """
+    print("Fetching workouts for user:", user["id"])
     try:
         return await workout_service.fetch_workouts(user["id"])
     except Exception as e:

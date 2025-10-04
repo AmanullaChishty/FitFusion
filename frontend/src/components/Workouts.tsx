@@ -1,6 +1,7 @@
 // frontend/src/components/Workouts.tsx
 import React, { useEffect, useState } from "react";
-import { fetchWorkouts, fetchRecommendations, type Workout, type Recommendation } from "../services/api";
+import { getWorkouts, type Workout } from "../services/workoutService";
+import { fetchRecommendations ,type Recommendation} from "../services/api";
 import { useSession } from "@supabase/auth-helpers-react";
 
 const Workouts: React.FC = () => {
@@ -14,7 +15,7 @@ const Workouts: React.FC = () => {
     const loadData = async () => {
       try {
         const token = (session as any).access_token as string; // Supabase session type patch
-        const workoutData = await fetchWorkouts(token);
+        const workoutData = await getWorkouts(token);
         setWorkouts(workoutData);
 
         const recData = await fetchRecommendations(token);
@@ -39,12 +40,12 @@ const Workouts: React.FC = () => {
       <ul className="space-y-4">
         {workouts.map((w, idx) => (
           <li key={idx} className="p-4 border rounded-lg shadow-sm">
-            <p className="font-medium">{w.exercise}</p>
+            <p className="font-medium">{w.exercise_name}</p>
             <p>
               Reps: {w.reps}, Sets: {w.sets}
             </p>
             <p className="text-sm text-blue-600 mt-2">
-              Suggestion: {getSuggestion(w.exercise)}
+              Suggestion: {getSuggestion(w.exercise_name)}
             </p>
           </li>
         ))}

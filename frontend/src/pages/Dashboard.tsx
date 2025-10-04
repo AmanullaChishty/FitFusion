@@ -42,6 +42,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import { useSession } from "@supabase/auth-helpers-react";
 import { fetchProfile, type Profile } from "../services/api";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const session = useSession();
@@ -52,6 +53,7 @@ export default function Dashboard() {
     console.log("Session changed:", session);
     if (!session) return;
     const token = (session as any).access_token;
+    localStorage.setItem("token", session.access_token);
 
     const loadProfile = async () => {
       try {
@@ -80,18 +82,53 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="p-4 bg-white shadow rounded">
             <h2 className="font-semibold mb-2">Profile Info</h2>
-            <p><strong>Age:</strong> {profile?.age || "-"}</p>
-            <p><strong>Weight:</strong> {profile?.weight || "-"} kg</p>
-            <p><strong>Height:</strong> {profile?.height || "-"} cm</p>
-            <p><strong>Training Level:</strong> {profile?.training_experience || "-"}</p>
-            <p><strong>Gender:</strong> {profile?.gender || "-"}</p>
+            <p>
+              <strong>Age:</strong> {profile?.age || "-"}
+            </p>
+            <p>
+              <strong>Weight:</strong> {profile?.weight || "-"} kg
+            </p>
+            <p>
+              <strong>Height:</strong> {profile?.height || "-"} cm
+            </p>
+            <p>
+              <strong>Training Level:</strong>{" "}
+              {profile?.training_experience || "-"}
+            </p>
+            <p>
+              <strong>Gender:</strong> {profile?.gender || "-"}
+            </p>
           </div>
           <div className="p-4 bg-white shadow rounded">
             <h2 className="font-semibold mb-2">Quick Actions</h2>
             <ul className="list-disc list-inside space-y-1">
-              <li><strong><a href="/workouts" className="text-blue-500 hover:underline">View Workouts</a></strong></li>
-              <li><strong><a href="/profile" className="text-blue-500 hover:underline">Update Profile</a></strong></li>
-              <li><strong><a href="/recommendations" className="text-blue-500 hover:underline">View AI Recommendations</a></strong></li>
+              <li>
+                <strong>
+                  <Link
+                    to="/workouts"
+                    className="text-blue-500 hover:underline"
+                  >
+                    View & Log Workouts
+                  </Link>
+                </strong>
+              </li>
+              <li>
+                <strong>
+                  <Link to="/profile" className="text-blue-500 hover:underline">
+                    Update Profile
+                  </Link>
+                </strong>
+              </li>
+              <li>
+                <strong>
+                  <Link
+                    to="/recommendations"
+                    className="text-blue-500 hover:underline"
+                  >
+                    View AI Recommendations
+                  </Link>
+                </strong>
+              </li>
             </ul>
           </div>
         </div>

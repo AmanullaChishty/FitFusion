@@ -4,6 +4,7 @@ import Signup from "./components/auth/Signup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ProfilePage from "./pages/Profile"; 
+import WorkoutsPage from "./pages/WorkoutsPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/workouts" element={<ProtectedRoute><WorkoutsPage /></ProtectedRoute>} />
         {/* Default redirect */}
         <Route path="*" element={<Login />} />
       </Routes>

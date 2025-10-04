@@ -2,12 +2,12 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL as string;
 
-export interface Workout {
-  id?: string;
-  exercise: string;
-  reps: number;
-  sets: number;
-}
+// export interface Workout {
+//   id?: string;
+//   exercise: string;
+//   reps: number;
+//   sets: number;
+// }
 
 export interface Recommendation {
   exercise: string;
@@ -22,12 +22,12 @@ export interface Profile {
   [key: string]: any;
 }
 
-export const fetchWorkouts = async (token: string): Promise<Workout[]> => {
-  const res = await axios.get<Workout[]>(`${API_URL}/api/workouts`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
-};
+// export const fetchWorkouts = async (token: string): Promise<Workout[]> => {
+//   const res = await axios.get<Workout[]>(`${API_URL}/api/workouts`, {
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+//   return res.data;
+// };
 
 export const fetchRecommendations = async (
   token: string
