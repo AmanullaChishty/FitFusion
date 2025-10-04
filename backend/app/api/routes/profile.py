@@ -20,10 +20,11 @@ async def get_profile(current_user: str = Depends(get_current_user)):
 @router.put("/profile", response_model=ProfileResponse)
 async def update_profile(payload: ProfileUpdate, current_user: str = Depends(get_current_user)):
     """Update user profile fields in Supabase users table."""
-    update_data = payload.dict(exclude_unset=True)
+    update_data = payload.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="No update fields provided")
-
+    print("Updating profile for user:", current_user["id"])
+    print("Update data:", update_data)
     response = supabase.table("users").update(update_data).eq("id", current_user["id"]).execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Profile update failed")

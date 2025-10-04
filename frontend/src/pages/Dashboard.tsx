@@ -83,6 +83,9 @@ export default function Dashboard() {
           <div className="p-4 bg-white shadow rounded">
             <h2 className="font-semibold mb-2">Profile Info</h2>
             <p>
+              <strong>Name:</strong> {profile?.username || "-"}
+            </p>
+            <p>
               <strong>Age:</strong> {profile?.age || "-"}
             </p>
             <p>

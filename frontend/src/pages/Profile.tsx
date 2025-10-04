@@ -62,6 +62,13 @@ export default function ProfilePage() {
         onChange={(e) => setProfile({ ...profile, age: Number(e.target.value) })}
       />
 
+      <label className="block mb-2">Gender:</label>
+      <input
+        className="border p-2 w-full mb-4"
+        value={profile.gender || ""}
+        onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+      />
+
       <label className="block mb-2">Weight (kg):</label>
       <input
         type="number"
@@ -76,6 +83,13 @@ export default function ProfilePage() {
         className="border p-2 w-full mb-4"
         value={profile.height || ""}
         onChange={(e) => setProfile({ ...profile, height: Number(e.target.value) })}
+      />
+
+      <label className="block mb-2">Training Experience:</label>
+      <input
+        className="border p-2 w-full mb-4"
+        value={profile.training_experience || ""}
+        onChange={(e) => setProfile({ ...profile, training_experience: e.target.value })}
       />
 
       <button

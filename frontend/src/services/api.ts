@@ -19,6 +19,8 @@ export interface Profile {
   age?: number;
   weight?: number;
   height?: number;
+  gender?: string;
+  training_experience?: string;
   [key: string]: any;
 }
 
