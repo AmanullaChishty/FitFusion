@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ProfilePage from "./pages/Profile"; 
 import WorkoutsPage from "./pages/WorkoutsPage";
+import MealsPage from "./pages/MealsPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           }
         />
         <Route path="/workouts" element={<ProtectedRoute><WorkoutsPage /></ProtectedRoute>} />
+        <Route path="/meals" element={<ProtectedRoute><MealsPage /></ProtectedRoute>} />
         {/* Default redirect */}
         <Route path="*" element={<Login />} />
       </Routes>
