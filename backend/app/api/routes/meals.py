@@ -19,7 +19,7 @@ def create_meal(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new meal entry for the authenticated user."""
-    data = payload.dict()
+    data = payload.model_dump()
     data["user_id"] = current_user["id"]  # enforce ownership
 
     try:
@@ -34,7 +34,7 @@ def create_meal(
 # --------------------------
 # READ ALL (with filters)
 # --------------------------
-@router.get("/", response_model=List[MealOut])
+@router.get("", response_model=List[MealOut])
 def list_meals(
     current_user: dict = Depends(get_current_user),
     date_: Optional[date] = Query(None, alias="date"),

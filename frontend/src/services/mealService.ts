@@ -36,6 +36,7 @@ export interface DailyTotals {
 }
 
 export interface RollingAveragesResponse {
+  dates: string;
   avg_calories: number;
   avg_protein_g: number;
   avg_carbs_g: number;
@@ -83,11 +84,12 @@ export const deleteMeal = async (token: string, mealId: string): Promise<void> =
  */
 export const getMealsByDate = async (
   token: string,
-  userId: string,
-  date: string
+  date: string,
+  userId: string
 ): Promise<MealOut[]> => {
-  const res = await api.get<MealOut[]>(`/api/meals/${userId}/${date}`, {
+  const res = await api.get<MealOut[]>(`/api/meals`, {
     headers: { Authorization: `Bearer ${token}` },
+    params: { date: date },
   });
   return res.data;
 };
@@ -97,13 +99,15 @@ export const getMealsByDate = async (
  */
 export const getDailyTotals = async (
   token: string,
-  userId: string,
   startDate: string,
   endDate: string
 ): Promise<DailyTotals[]> => {
   const res = await api.get<DailyTotals[]>(
-    `/api/meals/${userId}/totals?start_date=${startDate}&end_date=${endDate}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    `api/nutrition/daily-totals`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { start: startDate, end: endDate },
+    }
   );
   return res.data;
 };
@@ -113,13 +117,16 @@ export const getDailyTotals = async (
  */
 export const getRollingAverages = async (
   token: string,
-  userId: string,
   days: number = 7
 ): Promise<RollingAveragesResponse> => {
   const res = await api.get<RollingAveragesResponse>(
-    `/api/meals/${userId}/averages?days=${days}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    `api/nutrition/rolling-averages`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { window: days },
+    }
   );
+  console.log("Rolling averages response:", res.data);
   return res.data;
 };
 

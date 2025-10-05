@@ -16,6 +16,7 @@ export default function MealList({ date, refreshKey, user_id }: MealListProps) {
       const token = localStorage.getItem("token");
       if (!token) return;
       const data = await getMealsByDate(token, date,user_id);
+      console.log("Fetched meals:", data);
       setMeals(data);
     } catch (err) {
       console.error(err);
@@ -46,7 +47,12 @@ export default function MealList({ date, refreshKey, user_id }: MealListProps) {
             <li key={meal.id} className="border p-3 rounded flex justify-between items-center">
               <div>
                 <p className="font-semibold">{meal.meal_type}</p>
-                <p className="text-sm text-gray-600">{meal.food_items.join(", ")}</p>
+                {meal.food_items.map((item:any, index:number) => (
+                  <p key={index} className="text-sm text-gray-600">{item.item} : {item.qty}</p>
+                ))}
+                <p className="text-sm">Protein: {meal.protein_g} g</p>
+                <p className="text-sm">Carbs: {meal.carbs_g} g</p>
+                <p className="text-sm">Fats: {meal.fats_g} g</p>
                 <p className="text-sm">Calories: {meal.calories} kcal</p>
               </div>
               <button

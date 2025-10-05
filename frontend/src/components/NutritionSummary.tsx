@@ -1,20 +1,19 @@
 interface NutritionSummaryProps {
   totals: {
-    total_calories: number;
-    total_protein_g: number;
-    total_carbs_g: number;
-    total_fats_g: number;
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fats_g: number;
   } | null;
 }
 
 export default function NutritionSummary({ totals }: NutritionSummaryProps) {
   if (!totals) return null;
-
   const cards = [
-    { label: "Calories", value: `${totals.total_calories} kcal` },
-    { label: "Protein", value: `${totals.total_protein_g} g` },
-    { label: "Carbs", value: `${totals.total_carbs_g} g` },
-    { label: "Fats", value: `${totals.total_fats_g} g` },
+    { label: "Calories", value: `${totals.calories} kcal` },
+    { label: "Protein", value: `${totals.protein_g} g` },
+    { label: "Carbs", value: `${totals.carbs_g} g` },
+    { label: "Fats", value: `${totals.fats_g} g` },
   ];
 
   return (

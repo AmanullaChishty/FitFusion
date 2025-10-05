@@ -19,7 +19,6 @@ def get_daily_totals(
 
     res = query.execute()
     meals = res.data or []
-
     totals: Dict[str, Dict[str, float]] = {}
     for m in meals:
         d = m["date"]
@@ -61,6 +60,7 @@ def get_rolling_averages(
         sums["fats_g"] += m.get("fats_g", 0)
 
     return {
+        "dates": f"{start_date} to {today}",
         "calories_avg": round(sums["calories"] / total_days, 2),
         "protein_avg": round(sums["protein_g"] / total_days, 2),
         "carbs_avg": round(sums["carbs_g"] / total_days, 2),

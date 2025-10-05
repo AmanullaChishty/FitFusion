@@ -9,7 +9,7 @@ import { getDailyTotals, getRollingAverages } from "../services/mealService";
 export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [totals, setTotals] = useState<any | null>(null);
-  const [trends, setTrends] = useState<Array<{ date: string; calories: number; protein_g: number; carbs_g: number; fats_g: number }>>([]);
+  const [trends, setTrends] = useState<any | null>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [windowDays, setWindowDays] = useState(7);
   const userData = localStorage.getItem("profile_data");
@@ -19,11 +19,12 @@ export default function MealsPage() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const totalsData = await getDailyTotals(token, selectedDate, selectedDate,user_id);
+    const totalsData = await getDailyTotals(token, selectedDate, selectedDate);
     setTotals(totalsData[0]);
 
-    const trendsData = await getRollingAverages(token, user_id,windowDays);
-    setTrends(Array.isArray(trendsData) ? trendsData : []);
+    const trendsData = await getRollingAverages(token,windowDays);
+    const trendsArray = Array(trendsData);
+    setTrends(trendsArray);
   };
 
   useEffect(() => {
