@@ -7,32 +7,8 @@ interface NutritionTrendsChartProps {
   data: Array<{ dates: string[]; calories: number; protein_avg: number; carbs_avg: number; fats_avg: number }>;
 }
 
-export function expandDateRange(range: string): string[] {
-  if (!range.includes(" to ")) return [];
-
-  const [startStr, endStr] = range.split(" to ").map(s => s.trim());
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  const dates: string[] = [];
-
-  for (
-    let d = new Date(start);
-    d <= end;
-    d.setDate(d.getDate() + 1)
-  ) {
-    dates.push(d.toISOString().split("T")[0]); // format YYYY-MM-DD
-  }
-
-  return dates;
-}
 
 export default function NutritionTrendsChart({ data }: NutritionTrendsChartProps) {
-  
-  for (const rec of data) {
-    if (typeof rec.dates === "string") {
-      rec.dates = expandDateRange(rec.dates);
-    }
-  }
   console.log("NutritionTrendsChart data:", data);
   return (
     <div className="p-4 bg-white rounded shadow">

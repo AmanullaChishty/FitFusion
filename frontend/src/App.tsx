@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -9,6 +10,8 @@ import MealsPage from "./pages/MealsPage";
 
 function App() {
   return (
+    <>
+    <Toaster position="top-right" reverseOrder={false} />
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -35,6 +38,7 @@ function App() {
         <Route path="*" element={<Login />} />
       </Routes>
     </BrowserRouter>
+    </>
   );
 }
 

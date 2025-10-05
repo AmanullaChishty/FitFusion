@@ -9,30 +9,69 @@ interface LogMealFormProps {
 export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
   const [form, setForm] = useState({
     meal_type: "breakfast",
-    food_items: "",
     calories: "",
     protein_g: "",
     carbs_g: "",
     fats_g: "",
     date: new Date().toISOString().slice(0, 10),
   });
+
+  const [foodItems, setFoodItems] = useState([{ qty: "", item: "" }]);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Handle basic input changes (calories, macros, date, etc.)
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // Handle dynamic food item inputs
+  const handleFoodItemChange = (
+    index: number,
+    field: "qty" | "item",
+    value: string
+  ) => {
+    const newItems = [...foodItems];
+    newItems[index][field] = value;
+    setFoodItems(newItems);
+  };
+
+  const addFoodItem = () => {
+    setFoodItems([...foodItems, { qty: "", item: "" }]);
+  };
+
+  const removeFoodItem = (index: number) => {
+    setFoodItems(foodItems.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No auth token found.");
 
+      // Validate food items
+      const validFoodItems = foodItems.filter(
+        (f) => f.qty.trim() !== "" && f.item.trim() !== ""
+      );
+
+      if (validFoodItems.length === 0) {
+        toast.error("Please add at least one food item.");
+        setLoading(false);
+        return;
+      }
+
       await createMeal(token, {
         ...form,
-        meal_type: form.meal_type as "breakfast" | "lunch" | "dinner" | "snack",
-        food_items: form.food_items.split(",").map((item) => item.trim()),
+        meal_type: form.meal_type as
+          | "breakfast"
+          | "lunch"
+          | "dinner"
+          | "snack",
+        food_items: validFoodItems,
         calories: parseInt(form.calories),
         protein_g: parseFloat(form.protein_g),
         carbs_g: parseFloat(form.carbs_g),
@@ -40,7 +79,14 @@ export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
       });
 
       toast.success("Meal logged successfully!");
-      setForm({ ...form, food_items: "", calories: "", protein_g: "", carbs_g: "", fats_g: "" });
+      setForm({
+        ...form,
+        calories: "",
+        protein_g: "",
+        carbs_g: "",
+        fats_g: "",
+      });
+      setFoodItems([{ qty: "", item: "" }]);
       onMealAdded();
     } catch (err) {
       console.error(err);
@@ -51,8 +97,13 @@ export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white rounded-lg shadow space-y-3">
+    <form
+      onSubmit={handleSubmit}
+      className="p-4 bg-white rounded-lg shadow space-y-4"
+    >
       <h2 className="text-xl font-semibold">Log a Meal</h2>
+
+      {/* Meal Type */}
       <div>
         <label className="block mb-1 font-medium">Meal Type</label>
         <select
@@ -69,20 +120,58 @@ export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
         </select>
       </div>
 
+      {/* Food Items */}
       <div>
-        <label className="block mb-1 font-medium">Food Items (comma-separated)</label>
-        <textarea
-          name="food_items"
-          value={form.food_items}
-          onChange={handleChange}
-          rows={2}
-          className="w-full border rounded p-2"
-        />
+        <label className="block mb-1 font-medium">Food Items</label>
+        {foodItems.map((fi, index) => (
+          <div key={index} className="flex space-x-2 mb-2">
+            <input
+              type="text"
+              placeholder="Qty (e.g. 150g)"
+              value={fi.qty}
+              onChange={(e) =>
+                handleFoodItemChange(index, "qty", e.target.value)
+              }
+              className="w-1/3 border rounded p-2"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Item (e.g. fish)"
+              value={fi.item}
+              onChange={(e) =>
+                handleFoodItemChange(index, "item", e.target.value)
+              }
+              className="w-2/3 border rounded p-2"
+              required
+            />
+            {index > 0 && (
+              <button
+                type="button"
+                onClick={() => removeFoodItem(index)}
+                className="text-red-600 font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addFoodItem}
+          className="text-blue-600 text-sm underline"
+        >
+          + Add Food Item
+        </button>
       </div>
 
+      {/* Macros */}
       {["calories", "protein_g", "carbs_g", "fats_g"].map((field) => (
         <div key={field}>
-          <label className="block mb-1 font-medium capitalize">{field.replace("_g", " (g)")}</label>
+          <label className="block mb-1 font-medium capitalize">
+            {field.replace("_g", field === "calories" ? "" : " (g)")}
+          </label>
           <input
             type="number"
             name={field}
@@ -94,6 +183,7 @@ export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
         </div>
       ))}
 
+      {/* Date */}
       <div>
         <label className="block mb-1 font-medium">Date</label>
         <input
@@ -102,6 +192,7 @@ export default function LogMealForm({ onMealAdded }: LogMealFormProps) {
           value={form.date}
           onChange={handleChange}
           className="w-full border rounded p-2"
+          required
         />
       </div>
 

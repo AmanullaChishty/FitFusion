@@ -12,8 +12,6 @@ export default function MealsPage() {
   const [trends, setTrends] = useState<any | null>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [windowDays, setWindowDays] = useState(7);
-  const userData = localStorage.getItem("profile_data");
-  const user_id = userData ? JSON.parse(userData).id : null;
 
   const loadNutritionData = async () => {
     const token = localStorage.getItem("token");
@@ -47,7 +45,7 @@ export default function MealsPage() {
 
         <LogMealForm onMealAdded={() => setRefreshKey((k) => k + 1)} />
         <NutritionSummary totals={totals} />
-        <MealList date={selectedDate} refreshKey={refreshKey} user_id={user_id} />
+        <MealList date={selectedDate} refreshKey={refreshKey}/>
 
         <div className="flex justify-end space-x-2">
           <label>Rolling Window:</label>

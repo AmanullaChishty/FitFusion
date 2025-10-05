@@ -5,7 +5,6 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 class MealCreate(BaseModel):
-    user_id: UUID
     meal_type: str = Field(..., pattern="^(breakfast|lunch|dinner|snack)$")
     food_items: Union[List[Dict], List[str]]
     calories: int

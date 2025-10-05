@@ -50,7 +50,7 @@ export const createMeal = async (
   token: string,
   meal: MealCreate
 ): Promise<MealOut> => {
-  const res = await api.post<MealOut>("/api/meals", meal, {
+  const res = await api.post<MealOut>("/api/meals/", meal, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -84,8 +84,7 @@ export const deleteMeal = async (token: string, mealId: string): Promise<void> =
  */
 export const getMealsByDate = async (
   token: string,
-  date: string,
-  userId: string
+  date: string
 ): Promise<MealOut[]> => {
   const res = await api.get<MealOut[]>(`/api/meals`, {
     headers: { Authorization: `Bearer ${token}` },

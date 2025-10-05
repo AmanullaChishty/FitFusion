@@ -5,17 +5,16 @@ import toast from "react-hot-toast";
 interface MealListProps {
   date: string;
   refreshKey?: number;
-  user_id: string;
 }
 
-export default function MealList({ date, refreshKey, user_id }: MealListProps) {
+export default function MealList({ date, refreshKey }: MealListProps) {
   const [meals, setMeals] = useState<any[]>([]);
 
   const loadMeals = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const data = await getMealsByDate(token, date,user_id);
+      const data = await getMealsByDate(token, date);
       console.log("Fetched meals:", data);
       setMeals(data);
     } catch (err) {

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 
 from app.services.supabase_client import supabase
@@ -21,6 +21,8 @@ def create_meal(
     """Create a new meal entry for the authenticated user."""
     data = payload.model_dump()
     data["user_id"] = current_user["id"]  # enforce ownership
+    if isinstance(data.get("date"), (date, datetime)):
+        data["date"] = data["date"].isoformat()
 
     try:
         res = supabase.table("meals").insert(data).execute()
