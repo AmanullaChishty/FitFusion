@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import workouts,recommendations,auth,profile,meals,nutrition
+from app.api.routes import workouts,recommendations,auth,profile,meals,nutrition,progress
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -31,6 +31,7 @@ app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.include_router(meals.router, prefix="/api", tags=["meals"])
 app.include_router(nutrition.router, prefix="/api", tags=["nutrition"])
+app.include_router(progress.router, prefix="/api", tags=["progress"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains

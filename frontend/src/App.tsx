@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import ProfilePage from "./pages/Profile"; 
 import WorkoutsPage from "./pages/WorkoutsPage";
 import MealsPage from "./pages/MealsPage";
+import ProgressPage from "./pages/ProgressPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         />
         <Route path="/workouts" element={<ProtectedRoute><WorkoutsPage /></ProtectedRoute>} />
         <Route path="/meals" element={<ProtectedRoute><MealsPage /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
         {/* Default redirect */}
         <Route path="*" element={<Login />} />
       </Routes>

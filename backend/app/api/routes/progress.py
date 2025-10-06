@@ -14,7 +14,7 @@ async def create_progress(payload: ProgressCreate, user=Depends(get_current_user
     Create a new progress record for the current user.
     """
     try:
-        return await progress_service.insert_progress(user["id"], payload.dict(exclude_unset=True))
+        return await progress_service.insert_progress(user["id"], payload.model_dump(exclude_unset=True))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -44,7 +44,7 @@ async def update_progress(progress_id: str, payload: ProgressCreate, user=Depend
     Update an existing progress record for the current user.
     """
     try:
-        updated = await progress_service.update_progress(progress_id, user["id"], payload.dict(exclude_unset=True))
+        updated = await progress_service.update_progress(progress_id, user["id"], payload.model_dump(exclude_unset=True))
         if not updated:
             raise HTTPException(status_code=404, detail="Progress record not found")
         return updated
