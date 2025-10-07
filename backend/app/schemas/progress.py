@@ -24,7 +24,6 @@ class ProgressRead(ProgressCreate):
     id: uuid.UUID
     user_id: uuid.UUID
     created_at: datetime
-    updated_at: datetime
 
     class Config:
         orm_mode = True

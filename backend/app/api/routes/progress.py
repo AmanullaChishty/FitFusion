@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
+from datetime import date, datetime
 from ...schemas.progress import ProgressCreate, ProgressRead
 from ...services import progress_service
 from ...core.auth import get_current_user
@@ -13,8 +14,12 @@ async def create_progress(payload: ProgressCreate, user=Depends(get_current_user
     """
     Create a new progress record for the current user.
     """
+    data = payload.model_dump()
+    if isinstance(data.get("recorded_at"), (date, datetime)):
+        data["recorded_at"] = data["recorded_at"].isoformat()
+    print("progress post data:", data)
     try:
-        return await progress_service.insert_progress(user["id"], payload.model_dump(exclude_unset=True))
+        return await progress_service.insert_progress(user["id"], data)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

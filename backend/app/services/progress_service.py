@@ -11,7 +11,7 @@ async def insert_progress(user_id: str, progress_data: Dict[str, Any]) -> Dict[s
     response = supabase.table("progress").insert(progress_data).execute()
     print("Supabase insert response:", response)
     if not response.data:
-        raise Exception(f"Supabase insert error: {response.error}")
+        raise Exception(f"Supabase insert error")
     return response.data[0] if response.data else {}
 
 async def fetch_progress(user_id: str, skip: int = 0, limit: int = 50) -> List[Dict[str, Any]]:
@@ -28,8 +28,8 @@ async def fetch_progress(user_id: str, skip: int = 0, limit: int = 50) -> List[D
         .execute()
     )
     print("Supabase fetch response:", response)
-    if response.error:
-        raise Exception(f"Supabase fetch error: {response.error}")
+    if not response.data:
+        raise Exception(f"Supabase fetch error")
     return response.data or []
 
 async def get_progress_by_id(progress_id: str, user_id: str) -> Optional[Dict[str, Any]]:
@@ -45,8 +45,8 @@ async def get_progress_by_id(progress_id: str, user_id: str) -> Optional[Dict[st
         .execute()
     )
     print("Supabase get response:", response)
-    if response.error:
-        raise Exception(f"Supabase fetch error: {response.error}")
+    if not response.data:
+        raise Exception(f"Supabase fetch error")
     return response.data if response.data else None
 
 async def update_progress(progress_id: str, user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -66,7 +66,7 @@ async def update_progress(progress_id: str, user_id: str, update_data: Dict[str,
     )
     print("Supabase update response:", response)
     if not response.data:
-        raise Exception(f"Supabase update error: {response.error}")
+        raise Exception(f"Supabase update error")
     return response.data[0] if response.data else None
 
 async def delete_progress(progress_id: str, user_id: str) -> None:
@@ -81,5 +81,5 @@ async def delete_progress(progress_id: str, user_id: str) -> None:
         .execute()
     )
     print("Supabase delete response:", response)
-    if response.error:
-        raise Exception(f"Supabase delete error: {response.error}")
+    if not response.data:
+        raise Exception(f"Supabase delete error")

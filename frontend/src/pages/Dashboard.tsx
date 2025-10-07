@@ -93,6 +93,16 @@ export default function Dashboard() {
               <li>
                 <strong>
                   <Link
+                    to="/progress"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Progress
+                  </Link>
+                </strong>
+              </li>
+              <li>
+                <strong>
+                  <Link
                     to="/recommendations"
                     className="text-blue-500 hover:underline"
                   >
