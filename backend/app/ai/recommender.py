@@ -1,99 +1,65 @@
 # backend/ai/recommender.py
 
-from typing import List, Dict, Optional
-import logging
+import pandas as pd
+from typing import List, Dict
+from uuid import UUID
 
-logger = logging.getLogger(__name__)
-
-def generate_recommendations(
-    workouts: List[Dict],
-    rolling_averages: Optional[Dict] = None,
-    daily_totals: Optional[List[Dict]] = None,
-    body_weight: Optional[float] = None,
-    maintenance_calories: Optional[float] = None,
-) -> Dict:
+def recommend_progressions(user_id: UUID, df: pd.DataFrame) -> List[Dict]:
     """
-    Generate training, nutrition, and recovery recommendations based on
-    workout patterns and recent nutrition metrics.
-    Deterministic rule-based system (no ML yet).
+    Consume the preprocessed fitness dataset and return AI-based recommendations.
+    - df follows schema from Day 5 (one row per user-exercise-session)
     """
-    recommendations = []
-    metrics_used = {}
+    results = []
 
-    # --- Workout trend logic (existing simple rule) ---
-    exercise_counts = {}
-    for w in workouts or []:
-        exercise = w.get("exercise")
-        if not exercise:
-            continue
-        exercise_counts[exercise] = exercise_counts.get(exercise, 0) + 1
+    grouped = df.groupby("exercise")
+    for exercise, sub_df in grouped:
+        sub_df = sub_df.sort_values("date")
 
-    for exercise, count in exercise_counts.items():
-        if count >= 3:
-            recommendations.append({
-                "type": "training",
-                "message": f"Increase weight by +2.5 kg for {exercise}",
-                "rationale": "You’ve performed this exercise consistently (3+ sessions).",
-                "actionable": {"increase_weight": True, "percent": 5, "add_rest_day": False}
-            })
+        # recent sessions (last 3)
+        recent = sub_df.tail(3)
+
+        avg_rpe = recent["avg_rpe"].mean()
+        rolling_28d_trend = sub_df["rolling_28d_volume"].iloc[-1] - sub_df["rolling_28d_volume"].iloc[-2] if len(sub_df) > 1 else 0
+        last_weight = recent["weight_kg"].iloc[-1]
+        est_1rm_delta = sub_df["est_1rm"].iloc[-1] - sub_df["est_1rm"].iloc[-2] if len(sub_df) > 1 else 0
+
+        # -------------------------------
+        # RULES-BASED FALLBACK LOGIC
+        # -------------------------------
+        suggestion = None
+        rationale = ""
+        confidence = 0.5
+
+        # Progressive overload condition
+        if rolling_28d_trend > 0 and avg_rpe < 7:
+            suggestion = {"type": "increase_weight", "value": 2.5}
+            rationale = "Consistent volume increase and moderate RPE — ready to progress."
+            confidence = 0.85
+
+        elif avg_rpe < 6 and est_1rm_delta > 0:
+            suggestion = {"type": "increase_reps", "value": 1}
+            rationale = "Low RPE and strength improving — add a rep."
+            confidence = 0.8
+
+        # Recovery condition
+        elif avg_rpe > 8 and sub_df["body_weight_kg"].pct_change().iloc[-1] < -0.02:
+            suggestion = {"type": "recovery", "value": None}
+            rationale = "High RPE and recent weight loss — recommend recovery."
+            confidence = 0.9
+
+        # Default: maintain load
         else:
-            recommendations.append({
-                "type": "training",
-                "message": f"Stay consistent with {exercise}",
-                "rationale": "Not enough recent sessions to justify overload yet.",
-                "actionable": {"increase_weight": False, "percent": 0, "add_rest_day": False}
-            })
+            suggestion = {"type": "maintain", "value": None}
+            rationale = "Stable performance — maintain current load."
+            confidence = 0.6
 
-    # --- Nutrition & recovery analysis ---
-    if rolling_averages and body_weight and maintenance_calories:
-        calories_avg = rolling_averages.get("calories_avg")
-        protein_avg = rolling_averages.get("protein_avg")
-        fats_avg = rolling_averages.get("fats_avg")
-        carbs_avg = rolling_averages.get("carbs_avg")
+        results.append({
+            "exercise": exercise,
+            "current_weight": float(last_weight),
+            "suggestion": suggestion,
+            "confidence": confidence,
+            "rationale": rationale
+        })
 
-        protein_per_kg = protein_avg / body_weight if body_weight else None
-        metrics_used = {
-            "calories_avg": calories_avg,
-            "protein_avg": protein_avg,
-            "protein_per_kg": protein_per_kg,
-            "fats_avg": fats_avg,
-            "carbs_avg": carbs_avg,
-            "maintenance_calories": maintenance_calories,
-        }
-
-        # Rule 1: Low protein intake
-        if protein_per_kg is not None and protein_per_kg < 1.6:
-            recommendations.append({
-                "type": "nutrition",
-                "message": "Increase daily protein intake.",
-                "rationale": f"Current protein per kg ({protein_per_kg:.2f}) is below optimal (1.6 g/kg).",
-                "actionable": {"increase_protein_g": round((1.6 - protein_per_kg) * body_weight), "add_rest_day": False}
-            })
-
-        # Rule 2: Calorie deficit with high training frequency
-        total_sessions = len(workouts or [])
-        if calories_avg and calories_avg < (maintenance_calories - 300) and total_sessions >= 4:
-            recommendations.append({
-                "type": "recovery",
-                "message": "You may be under-recovering. Consider adding a rest day or mild deload.",
-                "rationale": f"Caloric intake ({calories_avg:.0f}) is below maintenance ({maintenance_calories}) during high training load ({total_sessions} sessions).",
-                "actionable": {"increase_weight": False, "add_rest_day": True}
-            })
-
-        # Rule 3: Calorie surplus but stagnant progress → overload suggestion
-        if calories_avg and calories_avg >= (maintenance_calories + 300) and total_sessions >= 3:
-            recommendations.append({
-                "type": "training",
-                "message": "Consider progressive overload — increase load by 2-5%.",
-                "rationale": f"Calorie intake is above maintenance, indicating recovery capacity for higher training stress.",
-                "actionable": {"increase_weight": True, "percent": 5, "add_rest_day": False}
-            })
-
-    # --- Logging (numeric only, anonymized) ---
-    try:
-        logger.info("Generated recommendations (no sensitive data): %s", metrics_used)
-    except Exception:
-        pass
-
-    return {"recommendations": recommendations, "metrics_used": metrics_used}
+    return results
 
