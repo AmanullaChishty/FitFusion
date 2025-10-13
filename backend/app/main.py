@@ -32,7 +32,7 @@ app.include_router(profile.router, prefix="/api", tags=["profile"])
 app.include_router(meals.router, prefix="/api", tags=["meals"])
 app.include_router(nutrition.router, prefix="/api", tags=["nutrition"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
-app.include_router(ai_routes.router, prefix="/api", tags=["ai"])
+app.include_router(ai_routes.router, prefix="/api", tags=["AI Recommender"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,          # only Codespaces domains
