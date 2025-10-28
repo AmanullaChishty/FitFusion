@@ -4,7 +4,7 @@ from app.services.workout_service import fetch_workouts
 from app.services.meal_service import get_rolling_averages  # New helper
 from .profile import get_profile as fetch_profile
 from app.core.auth import get_current_user
-from app.ai.recommender import generate_recommendations
+from app.ai.recommender import generate_recommendation_for_exercise
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
@@ -33,7 +33,7 @@ async def get_recommendations(
     body_weight = profile.get("weight") or 70.0  # fallback
     maintenance_calories = profile.get("maintenance_calories") or (body_weight * 32)  # rough TDEE estimate
 
-    result = generate_recommendations(
+    result = generate_recommendation_for_exercise(
         workouts=workouts,
         rolling_averages=rolling_averages,
         body_weight=body_weight,

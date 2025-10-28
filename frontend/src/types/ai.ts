@@ -43,12 +43,10 @@ export interface OverloadSuggestion {
  */
 export interface NextWorkoutSuggestionResponse {
   exercise_name: string;
-  action: string; // e.g., "+2.5 kg", "reduce 1 set", "rest day"
-  rationale: string;
-  confidence: number; // 0-100
-  coaching_cues?: string[];
-  is_recovery?: boolean;
+  base_suggestion: Record<string, any>;
+  enriched_suggestion: Record<string, any>;
 }
+
 
 /**
  * Example usage:

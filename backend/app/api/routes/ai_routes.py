@@ -44,18 +44,19 @@ class NextWorkoutSuggestionResponse(BaseModel):
 
 @router.get("/next-workout", response_model=List[NextWorkoutSuggestionResponse])
 async def get_next_workout(
-    user_id: str = Query(..., description="Supabase user UUID"),
     limit: int = Query(5, description="Number of exercises to suggest"),
-    current_user: Any = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Generate next-workout recommendations across top exercises.
     """
-    if current_user["id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to view this user’s data.")
+    print("Current user:", current_user['id'],flush=True)
+    # if current_user["id"] != user_id:
+    #     raise HTTPException(status_code=403, detail="Not authorized to view this user’s data.")
 
     try:
-        suggestions = await get_next_workout_suggestions_for_user(user_id, limit=limit)
+        suggestions = await get_next_workout_suggestions_for_user(current_user['id'], limit=limit)
+        print("Suggestions:", suggestions)
         return suggestions
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

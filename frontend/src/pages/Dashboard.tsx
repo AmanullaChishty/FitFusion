@@ -45,11 +45,11 @@ export default function Dashboard() {
     loadProfile();
   }, [session]);
 
+  const token = localStorage.getItem("token") || "";
   // Fetch AI suggestions once profile is loaded
   useEffect(() => {
-    if (!userId) return;
     const fetchSuggestions = async () => {
-      const data = await getNextWorkoutSuggestions(userId);
+      const data = await getNextWorkoutSuggestions(token);
       setSuggestions(data);
     };
     fetchSuggestions();
@@ -67,7 +67,7 @@ export default function Dashboard() {
 
   const handleAnalyze = async (exerciseName: string) => {
     if (!userId) return;
-    const analysis = await analyzeExercise(userId, exerciseName);
+    const analysis = await analyzeExercise(token,userId, exerciseName);
     if (analysis) {
       setSelectedAnalysis(analysis);
       setModalOpen(true);

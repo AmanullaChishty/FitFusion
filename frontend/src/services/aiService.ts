@@ -4,14 +4,15 @@ import { type NextWorkoutSuggestionResponse, type ExerciseTrend, type OverloadSu
 /**
  * Fetch top N AI-generated next workout suggestions for a user.
  */
-export const getNextWorkoutSuggestions = async (
-  userId: string,
+export const getNextWorkoutSuggestions = async (token:string,
   limit: number = 5
 ): Promise<NextWorkoutSuggestionResponse[]> => {
   try {
     const response = await api.get(`/api/ai/next-workout`, {
-      params: { user_id: userId, limit },
+      params: {limit },
+      headers: { Authorization: `Bearer ${token}` },
     });
+    console.log("Fetched AI next workout suggestions:", response.data);
     return response.data as NextWorkoutSuggestionResponse[];
   } catch (error) {
     console.error("Error fetching AI next workout suggestions:", error);
@@ -23,12 +24,14 @@ export const getNextWorkoutSuggestions = async (
  * Analyze a single exercise for a user: returns trend + overload suggestion.
  */
 export const analyzeExercise = async (
+  token:string,
   userId: string,
   exerciseName: string,
   lookback: number = 12
 ): Promise<{ trend: ExerciseTrend; suggestion: OverloadSuggestion } | null> => {
   try {
     const response = await api.post(`/api/ai/analyze-exercise`, {
+      headers: { Authorization: `Bearer ${token}` },
       user_id: userId,
       exercise_name: exerciseName,
       lookback,

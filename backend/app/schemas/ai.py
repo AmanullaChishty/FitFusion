@@ -42,11 +42,31 @@ class ExerciseTrend(BaseModel):
     recent_performances: List[ExercisePerformance] = Field(..., description="raw occurrences used to compute summaries")
 
 class OverloadSuggestion(BaseModel):
-    suggestion_type: Literal["increase_weight", "increase_reps", "add_set", "deload", "maintain", "technique_focus", "equipment_change"]
-    reason: str
-    recommended_change: Optional[str] = Field(None, description="human-readable instruction, e.g., '+2.5 kg', 'add 1 rep', 'deload week: -20% volume'")
-    confidence: float = Field(..., ge=0, le=1.0, description="0..1 confidence score from rule-based heuristics / model")
-    next_steps: Optional[List[str]] = None
+    """
+    Unified overload suggestion schema used by rule-based and AI advisors.
+    """
+    exercise: str = Field(..., description="Exercise name (e.g., 'Bicep Curl')")
+    suggestion_type: Literal[
+        "increase_weight",
+        "increase_reps",
+        "increase_sets",
+        "recovery",
+        "maintain"
+    ] = Field(..., description="Type of progression or recovery recommendation.")
+    value: Optional[float] = Field(
+        None,
+        description="Numeric adjustment value, e.g., +2.5 kg or +1 rep."
+    )
+    confidence_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Confidence level (0–1) of the recommendation."
+    )
+    rationale: str = Field(
+        ...,
+        description="Explanation or reasoning behind the recommendation."
+    )
 
 class NextWorkoutSuggestionResponse(BaseModel):
     user_id: str

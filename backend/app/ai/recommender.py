@@ -1,11 +1,12 @@
 import os
-import json
-import asyncio
+import asyncio,json,re,time
 import logging
-import openai
+from openai import AsyncOpenAI,OpenAIError
+from openai._exceptions import APIStatusError
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 from pydantic import BaseModel, ValidationError
+from dotenv import load_dotenv
 
 from app.ai.data_prep import aggregate_exercise_history
 from app.ai.fitness_advisor import (
@@ -19,9 +20,11 @@ from app.ai.fitness_advisor import (
 # ---------------------------------------------------
 # Setup & Configuration
 # ---------------------------------------------------
-openai.api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+client = AsyncOpenAI(api_key=api_key)
 
 # ---------------------------------------------------
 # Pydantic Schemas for Validation
@@ -62,52 +65,115 @@ and a base suggestion:
 and user's profile:
 {USER_PROFILE_JSON}
 
-produce a JSON object with keys:
-`exercise_name`, `suggested_action` ('increase_weight'|'increase_reps'|'increase_sets'|'maintain'|'deload'|'reduce_intensity'),
-`numeric_recommendation` (e.g. '+2.5kg' or '+2 reps'),
-`confidence` (0-1 float),
-`rationale` (string, max 50 words),
-`coaching_cues` (list of short strings).
+Return ONLY a JSON object with keys:
+- "exercise"
+- "suggestion_type" ("increase_weight","increase_reps","add_set","deload","maintain","technique_focus","equipment_change")
+- "value" (number)
+- "confidence_score" (float 0..1)
+- "rationale" (<= 50 words)
 """
+JSON_FENCE = re.compile(r'```(?:json)?(.*?)```', re.DOTALL)
+
+def extract_json(text: str) -> str:
+    """
+    Be lenient: prefer fenced JSON if present; else first {...} block.
+    """
+    m = JSON_FENCE.search(text)
+    if m:
+        return m.group(1).strip()
+    # fallback to first top-level JSON object
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start:end+1]
+    return text  # let json.loads fail loudly
+
+# simple in-memory fuse to avoid spamming the API for a while after a quota error
+_QUOTA_FUSE_UNTIL: float = 0.0
+_QUOTA_COOLDOWN_SEC = 900  # 15 minutes
+
+def quota_blocked() -> bool:
+    return time.time() < _QUOTA_FUSE_UNTIL
+
+def trip_quota_fuse():
+    global _QUOTA_FUSE_UNTIL
+    _QUOTA_FUSE_UNTIL = time.time() + _QUOTA_COOLDOWN_SEC
 
 # ---------------------------------------------------
 # Core Orchestration Functions
 # ---------------------------------------------------
-async def llm_enhance_suggestion(base_payload: Dict[str, Any],
-                                 exercise_trend: Dict[str, Any],
-                                 user_profile: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+async def llm_enhance_suggestion(
+    base_payload: Dict[str, Any],
+    exercise_trend: Dict[str, Any],
+    user_profile: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
     """
     Refine rule-based suggestions with an LLM for nuance and coaching cues.
     Returns a validated JSON response or None if LLM fails.
     """
+    if quota_blocked():
+        logger.warning("LLM disabled due to recent insufficient_quota; returning base payload.")
+        return base_payload
+
+    # (1) Align the prompt with YOUR pydantic model's fields
+    # If your OverloadSuggestion expects these keys:
+    #   exercise, suggestion_type, value, confidence_score, rationale
+    # then ask the model for EXACTLY these keys.
     prompt = USER_PROMPT_TEMPLATE.format(
         EXERCISE_TREND_JSON=json.dumps(exercise_trend, indent=2),
         BASE_PAYLOAD_JSON=json.dumps(base_payload, indent=2),
         USER_PROFILE_JSON=json.dumps(user_profile, indent=2)
     )
 
+    backoff = 1.0
     for attempt in range(3):
         try:
-            response = await asyncio.to_thread(openai.ChatCompletion.create,
-                model="gpt-4-turbo",
+            resp = await client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.3,
-                max_tokens=500
+                max_tokens=400,
+                response_format={"type": "json_object"},
             )
-            raw = response.choices[0].message["content"].strip()
-            data = json.loads(raw)
-            validated = OverloadSuggestion(**data)
-            return validated.dict()
-        except (json.JSONDecodeError, ValidationError) as e:
-            logger.warning(f"LLM response invalid on attempt {attempt+1}: {e}")
-            await asyncio.sleep(2 * (attempt + 1))
+            data = json.loads(resp.choices[0].message.content)
+            return OverloadSuggestion(**data).model_dump()
+
+        except APIStatusError as e:
+            # 429 covers rate limit AND insufficient_quota; check payload to branch
+            if e.status_code == 429:
+                err = None
+                try:
+                    err = e.response.json().get("error", {})
+                except Exception:
+                    pass
+                code = (err or {}).get("code")
+                if code == "insufficient_quota":
+                    logger.error("OpenAI insufficient_quota: disabling LLM temporarily.")
+                    trip_quota_fuse()
+                    return base_payload  # degrade gracefully
+                # true rate limit: backoff + retry
+                await asyncio.sleep(backoff)
+                backoff *= 2
+                continue
+            else:
+                logger.error(f"OpenAI API error {e.status_code}: {e}")
+                break
+
+        except OpenAIError as e:
+            logger.error(f"OpenAIError: {e}")
+            await asyncio.sleep(backoff)
+            backoff *= 2
+
         except Exception as e:
             logger.error(f"Unexpected LLM error: {e}")
-            await asyncio.sleep(2 * (attempt + 1))
-    return None
+            await asyncio.sleep(backoff)
+            backoff *= 2
+
+    # if all attempts fail for transient reasons, fall back
+    return base_payload
 
 
 async def generate_recommendation_for_exercise(user_id: str, exercise_name: str,
@@ -117,22 +183,26 @@ async def generate_recommendation_for_exercise(user_id: str, exercise_name: str,
     2. Apply deterministic rule-based logic.
     3. Optionally enhance with LLM.
     """
-    trend = await aggregate_exercise_history(user_id, exercise_name)
-    metrics = trend.get("metrics", {})
+    resp = await aggregate_exercise_history(user_id, exercise_name)
+    # print(f"Aggregated trend for {resp['exercise_name']}: {resp['trend_metrics']}", flush=True)
+    # metrics = trend.get("metrics", {})
+    
 
     # Step 1: Base rule-based suggestion
-    base_suggestion = await build_suggestion_payload(trend)
+    base_suggestion = await build_suggestion_payload(resp['exercise_name'], resp['trend_metrics'])
+    print(f"Base suggestion for {exercise_name}: {base_suggestion}", flush=True)
 
     # Step 2: Optionally call LLM if confidence < threshold or maintain
     enriched_suggestion = None
-    if base_suggestion["confidence_score"] < 0.75 or base_suggestion["action"] == "maintain":
+    if base_suggestion["confidence_score"] < 0.75 or base_suggestion["suggestion_type"] == "maintain":
         logger.info(f"Skipping LLM for {exercise_name} (low priority suggestion)")
     else:
-        enriched_suggestion = await llm_enhance_suggestion(base_suggestion, trend, user_profile or {})
+        enriched_suggestion = await llm_enhance_suggestion(base_suggestion, resp['trend_metrics'], user_profile or {})
 
     # Step 3: Fallback handling
     if not enriched_suggestion:
         enriched_suggestion = base_suggestion
+    print(f"Generated recommendation for {exercise_name}: {enriched_suggestion}", flush=True)
 
     return NextWorkoutSuggestion(
         user_id=user_id,
@@ -147,16 +217,17 @@ async def get_next_workout_suggestions_for_user(user_id: str, limit: int = 5) ->
     Pulls user's most recent exercises and generates top-N suggestions.
     """
     # TODO: integrate with DB or cached list of user's frequent exercises
-    recent_exercises = ["bench_press", "squat", "pull_up", "shoulder_press", "deadlift"][:limit]
+    # recent_exercises = ["Bicep Curl","bench_press", "squat", "pull_up", "shoulder_press", "deadlift"][:limit]
+
 
     results = []
-    for ex in recent_exercises:
+    for ex in ["Bicep Curl"]:
         try:
             suggestion = await generate_recommendation_for_exercise(user_id, ex)
-            results.append(suggestion.dict())
+            results.append(suggestion.model_dump())
         except Exception as e:
             logger.error(f"Failed to generate suggestion for {ex}: {e}")
-
+    print("Generated next workout suggestions:", results)
     return results
 
 
