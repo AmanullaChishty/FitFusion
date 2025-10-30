@@ -5,7 +5,7 @@ import { fetchProfile, type Profile } from "../services/api";
 import { Link } from "react-router-dom";
 import NextWorkoutSuggestionCard from "../components/NextWorkoutSuggestionCard";
 import Modal from "../components/Modal";
-import { type NextWorkoutSuggestionResponse, type ExerciseTrend, type OverloadSuggestion } from "../types/ai";
+import { type NextWorkoutSuggestionResponse, type ExerciseAnalysis } from "../types/ai";
 import { getNextWorkoutSuggestions, analyzeExercise } from "../services/aiService";
 
 export default function Dashboard() {
@@ -15,10 +15,7 @@ export default function Dashboard() {
 
   // AI workout suggestions
   const [suggestions, setSuggestions] = useState<NextWorkoutSuggestionResponse[]>([]);
-  const [selectedAnalysis, setSelectedAnalysis] = useState<{
-    trend: ExerciseTrend;
-    suggestion: OverloadSuggestion;
-  } | null>(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<ExerciseAnalysis | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const userId = profile?.id || "";
@@ -66,10 +63,12 @@ export default function Dashboard() {
   };
 
   const handleAnalyze = async (exerciseName: string) => {
+    console.log("Analyzing exercise:", userId);
     if (!userId) return;
-    const analysis = await analyzeExercise(token,userId, exerciseName);
+    const analysis = await analyzeExercise(token, exerciseName);
+    // console.log("Received analysis:", analysis);
     if (analysis) {
-      setSelectedAnalysis(analysis);
+      setSelectedAnalysis(analysis as ExerciseAnalysis);
       setModalOpen(true);
     }
   };
@@ -194,18 +193,18 @@ export default function Dashboard() {
             <div className="space-y-2">
               <p>
                 <strong>Recommendation:</strong>{" "}
-                {selectedAnalysis.suggestion.recommendation}{" "}
-                {selectedAnalysis.suggestion.suggested_delta > 0
-                  ? `+${selectedAnalysis.suggestion.suggested_delta}`
+                {selectedAnalysis.suggested_action}{" "}
+                {selectedAnalysis.numeric_recommendation != null && selectedAnalysis.numeric_recommendation > 0
+                  ? `+${selectedAnalysis.numeric_recommendation}`
                   : ""}
               </p>
               <p>
-                <strong>Rationale:</strong> {selectedAnalysis.suggestion.rationale}
+                <strong>Rationale:</strong> {selectedAnalysis.rationale}
               </p>
               <div>
                 <strong>Coaching Cues:</strong>
                 <ul className="list-disc list-inside ml-4">
-                  {selectedAnalysis.suggestion.coaching_cues.map((cue, idx) => (
+                  {selectedAnalysis.coaching_cues.map((cue, idx) => (
                     <li key={idx}>{cue}</li>
                   ))}
                 </ul>
@@ -213,10 +212,10 @@ export default function Dashboard() {
               <div>
                 <strong>Metrics:</strong>
                 <ul className="list-disc list-inside ml-4">
-                  <li>Volume Slope: {selectedAnalysis.trend.metrics.volume_slope.toFixed(2)}</li>
-                  <li>Top Set Slope: {selectedAnalysis.trend.metrics.top_set_slope.toFixed(2)}</li>
-                  <li>RPE Trend: {selectedAnalysis.trend.metrics.rpe_trend.toFixed(2)}</li>
-                  <li>Consistency: {(selectedAnalysis.trend.metrics.consistency * 100).toFixed(0)}%</li>
+                  <li>Volume Slope: {selectedAnalysis.trend_metrics.volume_slope.toFixed(2)}</li>
+                  <li>Top Set Slope: {selectedAnalysis.trend_metrics.weight_slope.toFixed(2)}</li>
+                  <li>RPE Trend: {selectedAnalysis.trend_metrics.rpe_trend.toFixed(2)}</li>
+                  <li>Consistency: {(selectedAnalysis.trend_metrics.consistency * 100).toFixed(0)}%</li>
                 </ul>
               </div>
             </div>

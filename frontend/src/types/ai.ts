@@ -38,6 +38,23 @@ export interface OverloadSuggestion {
   confidence: number; // 0-100 for frontend display
 }
 
+export interface AnalysisTrendMetrics {
+  volume_slope: number;
+  weight_slope: number;
+  rpe_trend: number;
+  consistency: number;
+}
+
+export interface ExerciseAnalysis {
+  trend_metrics: AnalysisTrendMetrics;
+  exercise_name: string;
+  suggested_action: string;
+  numeric_recommendation: number | null; // e.g., 1 for +1 rep, null when N/A
+  confidence: number; // 0..1 as returned by API
+  rationale: string;
+  coaching_cues: string[];
+}
+
 /**
  * Next workout suggestion for a user, to display in the dashboard card.
  */

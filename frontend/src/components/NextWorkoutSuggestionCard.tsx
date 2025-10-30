@@ -12,13 +12,10 @@ const NextWorkoutSuggestionCard: React.FC<Props> = ({ suggestion, onApply, onIgn
 
   const {
     exercise_name,
-    action,
-    rationale,
-    confidence,
-    coaching_cues,
-    is_recovery,
+    base_suggestion,
+    enriched_suggestion
   } = suggestion;
-
+  const { suggestion_type, rationale, confidence_score, coaching_cues, is_recovery } = enriched_suggestion;
   const progressColor = is_recovery ? "bg-yellow-400" : "bg-green-500";
 
   return (
@@ -31,7 +28,7 @@ const NextWorkoutSuggestionCard: React.FC<Props> = ({ suggestion, onApply, onIgn
       </div>
 
       <p className="text-gray-700 mb-1">
-        <span className="font-medium">Action:</span> {action}
+        <span className="font-medium">Action:</span> {suggestion_type}
       </p>
       <p className="text-gray-600 text-sm mb-2">{rationale}</p>
 
@@ -39,7 +36,7 @@ const NextWorkoutSuggestionCard: React.FC<Props> = ({ suggestion, onApply, onIgn
       <div className="w-full bg-gray-200 h-2 rounded-full mb-2">
         <div
           className={`${progressColor} h-2 rounded-full`}
-          style={{ width: `${confidence}%` }}
+          style={{ width: `${confidence_score*100}%` }}
         />
       </div>
 
@@ -54,7 +51,7 @@ const NextWorkoutSuggestionCard: React.FC<Props> = ({ suggestion, onApply, onIgn
           </button>
           {showCues && (
             <ul className="mt-1 list-disc list-inside text-gray-700 text-sm">
-              {coaching_cues.map((cue, idx) => (
+              {coaching_cues.map((cue:any, idx:any) => (
                 <li key={idx}>{cue}</li>
               ))}
             </ul>

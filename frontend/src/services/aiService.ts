@@ -25,17 +25,17 @@ export const getNextWorkoutSuggestions = async (token:string,
  */
 export const analyzeExercise = async (
   token:string,
-  userId: string,
   exerciseName: string,
   lookback: number = 12
 ): Promise<{ trend: ExerciseTrend; suggestion: OverloadSuggestion } | null> => {
+  // console.log(`token ${token} Analyzing exercise ${exerciseName}`);
   try {
-    const response = await api.post(`/api/ai/analyze-exercise`, {
-      headers: { Authorization: `Bearer ${token}` },
-      user_id: userId,
-      exercise_name: exerciseName,
-      lookback,
-    });
+    const response = await api.post(
+      `/api/ai/analyze-exercise`,
+      { exercise_name: exerciseName, lookback }, 
+      {headers: {Authorization: `Bearer ${token}` },}
+    );
+    // console.log(`Analysis for exercise ${exerciseName}:`, response);
     return response.data as { trend: ExerciseTrend; suggestion: OverloadSuggestion };
   } catch (error) {
     console.error(`Error analyzing exercise ${exerciseName}:`, error);

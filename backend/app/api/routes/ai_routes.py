@@ -20,6 +20,7 @@ class CoachingCue(BaseModel):
     text: str
 
 class OverloadSuggestionResponse(BaseModel):
+    trend_metrics: dict
     exercise_name: str
     suggested_action: str
     numeric_recommendation: Optional[str]
@@ -70,24 +71,28 @@ async def analyze_exercise(
     """
     Detailed analysis for one exercise using both rule-based and LLM logic.
     """
-    user_id = payload.get("user_id")
+    # print("Payload received:", payload)
+    user_id = current_user["id"]
     exercise_name = payload.get("exercise_name")
     lookback = payload.get("lookback", 5)
+    # print(f"Analyzing exercise {exercise_name} for user {user_id}")
 
     if not user_id or not exercise_name:
         raise HTTPException(status_code=400, detail="Missing user_id or exercise_name.")
 
-    if current_user["id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this user’s data.")
+    # if current_user["id"] != user_id:
+    #     raise HTTPException(status_code=403, detail="Not authorized to access this user’s data.")
 
     try:
-        trend = await aggregate_exercise_history(user_id, exercise_name, lookback_window=lookback)
+        trend = await aggregate_exercise_history(user_id, exercise_name, lookback_sessions=[lookback])
         suggestion = await generate_recommendation_for_exercise(user_id, exercise_name)
         enriched = suggestion.enriched_suggestion or suggestion.base_suggestion
-
+        # print(f"Generated suggestion: {enriched}")
+        # print(f"Analysis trend:{trend.trend_metrics}")
         return OverloadSuggestionResponse(
+            trend_metrics=trend.get("trend_metrics", {}),
             exercise_name=exercise_name,
-            suggested_action=enriched["action"],
+            suggested_action=enriched["suggestion_type"],
             numeric_recommendation=enriched.get("numeric_recommendation"),
             confidence=enriched["confidence_score"],
             rationale=enriched["rationale"],
