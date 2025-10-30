@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
 import LogMealForm from "../components/LogMealForm";
 import MealList from "../components/MealList";
 import NutritionSummary from "../components/NutritionSummary";
@@ -31,7 +30,6 @@ export default function MealsPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
       <div className="max-w-5xl mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Meals & Nutrition</h1>

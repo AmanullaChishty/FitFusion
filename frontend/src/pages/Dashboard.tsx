@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/layout/Navbar";
 import { useSession } from "@supabase/auth-helpers-react";
 import { fetchProfile, type Profile } from "../services/api";
 import { Link } from "react-router-dom";
@@ -16,6 +15,7 @@ export default function Dashboard() {
   // AI workout suggestions
   const [suggestions, setSuggestions] = useState<NextWorkoutSuggestionResponse[]>([]);
   const [selectedAnalysis, setSelectedAnalysis] = useState<ExerciseAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const userId = profile?.id || "";
@@ -63,32 +63,35 @@ export default function Dashboard() {
   };
 
   const handleAnalyze = async (exerciseName: string) => {
-    console.log("Analyzing exercise:", userId);
-    if (!userId) return;
+  if (!userId) return;
+  try {
+    setAnalyzing(exerciseName);
     const analysis = await analyzeExercise(token, exerciseName);
-    // console.log("Received analysis:", analysis);
     if (analysis) {
       setSelectedAnalysis(analysis as ExerciseAnalysis);
       setModalOpen(true);
     }
-  };
+  } catch (e) {
+    console.error("Analyze error:", e);
+  } finally {
+    setAnalyzing(null);
+  }
+};
 
   if (loading)
     return (
       <div className="min-h-screen bg-gray-100">
-        <Navbar />
         <p className="p-4">Loading dashboard...</p>
       </div>
     );
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
       <div className="max-w-4xl mx-auto p-6">
         {/* Profile + Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="p-4 bg-white shadow rounded">
-            <h2 className="font-semibold mb-2">Profile Info</h2>
+            <h2 className="font-bold mb-2">Profile Info</h2>
             <p>
               <strong>Name:</strong> {profile?.username || "-"}
             </p>
@@ -173,11 +176,31 @@ export default function Dashboard() {
                   onIgnore={handleIgnore}
                 />
                 <button
-                  className="mt-2 text-sm text-blue-500 underline"
-                  onClick={() => handleAnalyze(s.exercise_name)}
-                >
-                  Analyze Exercise
-                </button>
+  className={`mt-2 text-sm underline px-3 py-2 rounded 
+             ${analyzing === s.exercise_name
+               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+               : "text-blue-500 hover:text-blue-600 bg-transparent"}`}
+  onClick={() => handleAnalyze(s.exercise_name)}
+  disabled={analyzing === s.exercise_name}
+>
+  {analyzing === s.exercise_name ? (
+    <span className="inline-flex items-center gap-2">
+      <svg
+        className="animate-spin h-4 w-4"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      Analyzing…
+    </span>
+  ) : (
+    "Analyze Exercise"
+  )}
+</button>
               </div>
             ))}
           </div>
