@@ -12,7 +12,6 @@ const NextWorkoutSuggestionCard: React.FC<Props> = ({ suggestion, onApply, onIgn
 
   const {
     exercise_name,
-    base_suggestion,
     enriched_suggestion
   } = suggestion;
   const { suggestion_type, rationale, confidence_score, coaching_cues, is_recovery } = enriched_suggestion;

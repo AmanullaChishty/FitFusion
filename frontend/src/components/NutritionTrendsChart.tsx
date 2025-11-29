@@ -1,6 +1,5 @@
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend, BarChart, Bar,
-  Rectangle,
 } from "recharts";
 
 interface NutritionTrendsChartProps {

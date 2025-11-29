@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchProgress, createProgress } from '../services/progressService';
 import ProgressChart from '../components/ProgressChart';
 import LogProgressForm from '../components/LogProgressForm';

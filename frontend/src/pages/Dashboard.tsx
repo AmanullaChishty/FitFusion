@@ -67,8 +67,9 @@ export default function Dashboard() {
   try {
     setAnalyzing(exerciseName);
     const analysis = await analyzeExercise(token, exerciseName);
+    // console.log("Received analysis:", analysis);
     if (analysis) {
-      setSelectedAnalysis(analysis as ExerciseAnalysis);
+      setSelectedAnalysis(analysis as unknown as ExerciseAnalysis);
       setModalOpen(true);
     }
   } catch (e) {
