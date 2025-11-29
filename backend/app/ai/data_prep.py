@@ -95,7 +95,7 @@ async def aggregate_exercise_history(
     window = max(lookback_sessions) if lookback_sessions else 12
     raw_workouts = await fetch_raw_workouts(user_id, exercise_name, window)
     sessions: List[Dict[str, Any]] = []
-    print(f"Fetched {len(raw_workouts)} workouts for exercise {exercise_name}", flush=True)
+    # print(f"Fetched {len(raw_workouts)} workouts for exercise {exercise_name}", flush=True)
 
     for w in raw_workouts:
         sets = await normalize_sets(w)

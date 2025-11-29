@@ -8,6 +8,7 @@ export default function WorkoutsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSelectWorkout = (id: string) => {
+    console.log("Selected workout ID:", id);
     setSelectedWorkoutId(id);
   };
 
@@ -34,7 +35,7 @@ export default function WorkoutsPage() {
       )}
 
       {!selectedWorkoutId ? (
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-12">
           <div>
             <h2 className="text-xl font-semibold mb-2">Log a New Workout</h2>
             <LogWorkoutForm onSuccess={handleWorkoutLogged} />

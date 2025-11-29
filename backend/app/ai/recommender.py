@@ -190,7 +190,7 @@ async def generate_recommendation_for_exercise(user_id: str, exercise_name: str,
 
     # Step 1: Base rule-based suggestion
     base_suggestion = await build_suggestion_payload(resp['exercise_name'], resp['trend_metrics'])
-    print(f"Base suggestion for {exercise_name}: {base_suggestion}", flush=True)
+    # print(f"Base suggestion for {exercise_name}: {base_suggestion}", flush=True)
 
     # Step 2: Optionally call LLM if confidence < threshold or maintain
     enriched_suggestion = None

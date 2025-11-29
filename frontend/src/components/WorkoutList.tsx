@@ -26,8 +26,8 @@ export default function WorkoutList({ onSelect }: { onSelect: (id: string) => vo
   }, [filterDate]);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Your Workouts</h2>
+    <div>
+      {/* <h2 className="text-xl font-semibold mb-4">Your Workouts</h2> */}
 
       {error && <p className="text-red-500">{error}</p>}
 
