@@ -59,8 +59,6 @@ export default function Signup() {
         <option value="Female">female</option>
         <option value="Other">other</option>
       </select>
-
-       <p className="text-red-500">{error}</p>
         <input
           className="border p-2"
           type="email"
@@ -123,6 +121,7 @@ export default function Signup() {
         <p className="text-sm text-gray-600">
           Password must be at least 8 characters and include a letter, a number, and a symbol.
         </p>
+      {error && <p className="text-red-500">{error}</p>}
       <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={loading}>
         {loading ? 'Signing up...' : 'Sign Up'}
       </button>
