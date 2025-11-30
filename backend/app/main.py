@@ -58,8 +58,8 @@ frontend_origins: List[str] = [s.strip() for s in frontend_env.split(",") if s.s
 ENABLE_CODESPACES = os.getenv("ENABLE_CODESPACES", "0") == "1"
 codespaces_regex = r"https://.*\.app\.github\.dev"
 
-allow_origins = default_origins + frontend_origins
-allow_origins.update([s.strip() for s in os.getenv("FRONTEND_ORIGINS","").split(",") if s.strip()])
+allow_origins = set(default_origins)
+allow_origins.update(frontend_origins)
 
 # Configure CORSMiddleware
 # If you need regex-based allow for Codespaces, pass allow_origin_regex (FastAPI/Starlette supports both).
@@ -77,7 +77,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
         origin = request.headers.get("origin")
         # handle preflight
         if request.method == "OPTIONS":
-            if origin and origin in allowed:
+            if origin and origin in allow_origins:
                 headers = {
                     "Access-Control-Allow-Origin": origin,
                     "Access-Control-Allow-Credentials": "true",
@@ -87,7 +87,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
                 return Response(status_code=200, headers=headers)
             return Response(status_code=400, content="CORS origin not allowed")
         resp = await call_next(request)
-        if origin and origin in allowed:
+        if origin and origin in allow_origins:
             resp.headers["Access-Control-Allow-Origin"] = origin
             resp.headers["Access-Control-Allow-Credentials"] = "true"
         return resp
