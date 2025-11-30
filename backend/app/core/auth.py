@@ -2,7 +2,7 @@
 import os
 import logging
 import jwt
-from jwt import PyJWKClient, PyJWKClientError, InvalidSignatureError, InvalidIssuerError, ExpiredSignatureError, InvalidTokenError
+from jwt import PyJWKClient
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from app.core.config import settings
