@@ -66,7 +66,7 @@ export default function ProfilePage() {
       <input
         className="border p-2 w-full mb-4"
         value={profile.gender || ""}
-        onChange={(e) => setProfile({ ...profile, gender: e.target.value })}
+        onChange={(e) => setProfile({ ...profile, gender: e.target.value.toLowerCase() })}
       />
 
       <label className="block mb-2">Weight (kg):</label>
