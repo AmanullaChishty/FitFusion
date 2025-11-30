@@ -2,7 +2,9 @@
 import os
 from typing import List
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+# from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     workouts,
@@ -45,6 +47,7 @@ app.include_router(ai_routes.router, prefix="/api", tags=["AI Recommender"])
 default_origins = [
     "http://localhost:3000",
     "http://localhost:5173",  # Vite dev
+    "https://*.app.github.dev",
 ]
 
 
@@ -56,16 +59,37 @@ ENABLE_CODESPACES = os.getenv("ENABLE_CODESPACES", "0") == "1"
 codespaces_regex = r"https://.*\.app\.github\.dev"
 
 allow_origins = default_origins + frontend_origins
+allow_origins.update([s.strip() for s in os.getenv("FRONTEND_ORIGINS","").split(",") if s.strip()])
 
 # Configure CORSMiddleware
 # If you need regex-based allow for Codespaces, pass allow_origin_regex (FastAPI/Starlette supports both).
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins,              # explicit origins (preferred)
-    allow_origin_regex=(codespaces_regex if ENABLE_CODESPACES else None),
-    allow_credentials=True,                   # required if sending cookies or credentials
-    allow_methods=["*"],
-    allow_headers=["*"],                      # or explicitly ["Authorization","Content-Type"]
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=allow_origins,              # explicit origins (preferred)
+#     allow_origin_regex=(codespaces_regex if ENABLE_CODESPACES else None),
+#     allow_credentials=True,                   # required if sending cookies or credentials
+#     allow_methods=["*"],
+#     allow_headers=["*"],                      # or explicitly ["Authorization","Content-Type"]
+# )
 # --------------------------------------------
+class DynamicCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        origin = request.headers.get("origin")
+        # handle preflight
+        if request.method == "OPTIONS":
+            if origin and origin in allowed:
+                headers = {
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Allow-Headers": "Authorization,Content-Type",
+                    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+                }
+                return Response(status_code=200, headers=headers)
+            return Response(status_code=400, content="CORS origin not allowed")
+        resp = await call_next(request)
+        if origin and origin in allowed:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Access-Control-Allow-Credentials"] = "true"
+        return resp
 
+app.add_middleware(DynamicCORSMiddleware)
