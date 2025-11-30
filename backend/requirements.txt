@@ -9,3 +9,4 @@ email-validator
 openai
 numpy
 pandas
+cryptography>=40.0.0
