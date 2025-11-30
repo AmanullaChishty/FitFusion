@@ -63,11 +63,16 @@ export default function ProfilePage() {
       />
 
       <label className="block mb-2">Gender:</label>
-      <input
+      <select
         className="border p-2 w-full mb-4"
         value={profile.gender || ""}
         onChange={(e) => setProfile({ ...profile, gender: e.target.value.toLowerCase() })}
-      />
+      >
+        <option value="">Select gender</option>
+        <option value="male">male</option>
+        <option value="female">female</option>
+        <option value="other">other</option>
+      </select>
 
       <label className="block mb-2">Weight (kg):</label>
       <input
@@ -86,11 +91,17 @@ export default function ProfilePage() {
       />
 
       <label className="block mb-2">Training Experience:</label>
-      <input
+      <select
         className="border p-2 w-full mb-4"
         value={profile.training_experience || ""}
         onChange={(e) => setProfile({ ...profile, training_experience: e.target.value })}
-      />
+      >
+        <option value="">Select experience level</option>
+        <option value="beginner">Beginner</option>
+        <option value="amateur">Amateur</option>
+        <option value="amateur">Intermediate</option>
+        <option value="experienced">Experienced</option>
+      </select>
 
       <button
         className="bg-blue-500 text-white px-4 py-2 rounded"
