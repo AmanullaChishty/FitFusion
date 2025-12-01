@@ -7,6 +7,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [showReset, setShowReset] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
+
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -25,6 +31,31 @@ export default function Login() {
       setError(error.message);
     } else {
       navigate("/dashboard");
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError("");
+    setResetSuccess("");
+
+    if (!email) {
+      setResetError("Please enter your email first.");
+      return;
+    }
+
+    setResetLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setResetLoading(false);
+
+    if (error) {
+      setResetError(error.message);
+    } else {
+      setResetSuccess("Password reset link sent. Check your email.");
     }
   };
 
@@ -105,6 +136,11 @@ export default function Login() {
               </div>
               <button
                 type="button"
+                onClick={() => {
+                  setShowReset((prev) => !prev);
+                  setResetError("");
+                  setResetSuccess("");
+                }}
                 className="text-emerald-700 hover:text-emerald-600 hover:underline transition"
               >
                 Forgot password?
@@ -119,6 +155,45 @@ export default function Login() {
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
+
+          {/* Forgot password panel */}
+          {showReset && (
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+              <h2 className="text-sm font-semibold text-slate-800 mb-2">
+                Reset your password
+              </h2>
+              <p className="text-xs text-slate-500 mb-3">
+                Enter your email and we&apos;ll send you a link to create a new
+                password.
+              </p>
+
+              <form onSubmit={handleResetPassword} className="space-y-3">
+                <input
+                  className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+
+                {resetError && (
+                  <p className="text-xs text-red-600">{resetError}</p>
+                )}
+                {resetSuccess && (
+                  <p className="text-xs text-emerald-600">{resetSuccess}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {resetLoading ? "Sending link..." : "Send reset link"}
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Footer / Sign up link */}
           <p className="mt-6 text-center text-xs text-slate-500">

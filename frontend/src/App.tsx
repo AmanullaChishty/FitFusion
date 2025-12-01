@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
+import ResetPassword from "./components/auth/ResetPassword";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -21,6 +22,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected layout (Navbar lives here) */}
           <Route
