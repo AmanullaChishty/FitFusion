@@ -12,16 +12,42 @@ const Modal: React.FC<Props> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-4 w-full max-w-lg shadow-lg">
-        {title && <h2 className="text-lg font-semibold mb-2">{title}</h2>}
-        <div>{children}</div>
-        <button
-          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
-          onClick={onClose}
-        >
-          Close
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-xl sm:p-6">
+        {/* Header */}
+        {title && (
+          <div className="mb-3 flex items-center justify-between gap-2">
+            {title ? (
+              <h2 className="text-base font-semibold text-slate-900">
+                {title}
+              </h2>
+            ) : (
+              <span />
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 text-sm font-medium shadow-sm transition hover:border-slate-300 hover:text-slate-700"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="text-sm text-slate-700">{children}</div>
+
+        {/* Footer */}
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

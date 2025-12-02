@@ -4,7 +4,9 @@ import WorkoutList from "../components/WorkoutList";
 import WorkoutDetail from "../components/WorkoutDetail";
 
 export default function WorkoutsPage() {
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(
+    null
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSelectWorkout = (id: string) => {
@@ -17,37 +19,83 @@ export default function WorkoutsPage() {
   };
 
   const handleWorkoutLogged = () => {
-    // show success alert
     setSuccessMessage("Workout logged successfully!");
-    // auto-dismiss after 3 seconds
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Workouts</h1>
-
-      {/* Success Alert */}
-      {successMessage && (
-        <div className="mb-4 p-3 bg-green-100 text-green-800 border border-green-300 rounded">
-          {successMessage}
-        </div>
-      )}
-
-      {!selectedWorkoutId ? (
-        <div className="grid md:grid-cols-2 gap-12">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold mb-2">Log a New Workout</h2>
-            <LogWorkoutForm onSuccess={handleWorkoutLogged} />
+            <h1 className="text-2xl font-semibold text-slate-900">Workouts</h1>
+            <p className="text-sm text-slate-500">
+              Log your sessions and review your recent training.
+            </p>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Your Logged Workouts</h2>
-            <WorkoutList onSelect={handleSelectWorkout} />
+          <div className="inline-flex items-center rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            Training log
           </div>
-        </div>
-      ) : (
-        <WorkoutDetail id={selectedWorkoutId} onBack={handleBackToList} />
-      )}
+        </header>
+
+        {/* Success Alert */}
+        {successMessage && (
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+            {successMessage}
+          </div>
+        )}
+
+        {!selectedWorkoutId ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Log workout card */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-slate-900">
+                Log a new workout
+              </h2>
+              <p className="mb-4 text-xs text-slate-500">
+                Capture today&apos;s session to keep your recommendations
+                accurate.
+              </p>
+              <LogWorkoutForm onSuccess={handleWorkoutLogged} />
+            </section>
+
+            {/* Workouts list card */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-slate-900">
+                Your logged workouts
+              </h2>
+              <p className="mb-4 text-xs text-slate-500">
+                Tap a workout to see set details and analysis.
+              </p>
+              <div className="max-h-[480px] overflow-y-auto pr-1">
+                <WorkoutList onSelect={handleSelectWorkout} />
+              </div>
+            </section>
+          </div>
+        ) : (
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Workout details
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Review sets, volume, and performance for this session.
+                </p>
+              </div>
+              <button
+                onClick={handleBackToList}
+                className="rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800"
+              >
+                Back to workouts
+              </button>
+            </div>
+
+            <WorkoutDetail id={selectedWorkoutId} onBack={handleBackToList} />
+          </section>
+        )}
+      </div>
     </div>
   );
 }

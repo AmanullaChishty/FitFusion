@@ -29,7 +29,7 @@ export default function Navbar() {
             to="/dashboard"
             className="inline-flex items-center rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-base font-bold text-emerald-700 tracking-tight"
           >
-            FitFusion 🤸
+           FitFusion 🤸
           </Link>
           <span className="hidden text-xs text-slate-500 sm:inline">
             Track workouts · Log meals · Stay on course
@@ -47,7 +47,7 @@ export default function Navbar() {
                   onClick={toggleDashboardMenu}
                   className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none"
                 >
-                  Dashboard
+                  Menu
                   <svg
                     className={`ml-1 inline-block h-4 w-4 text-slate-500 transition-transform ${
                       isDashboardOpen ? "rotate-180" : ""
@@ -79,7 +79,7 @@ export default function Navbar() {
                     className="block px-4 py-2 hover:bg-slate-50"
                     onClick={closeDashboardMenu}
                   >
-                    Overview
+                    Dashboard
                   </Link>
                   <Link
                     to="/workouts"
