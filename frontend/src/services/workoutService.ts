@@ -19,7 +19,7 @@ export async function createWorkout(token: string, data: Workout): Promise<Worko
 
 // Get workouts (optionally filter by date)
 export async function getWorkouts(token: string, filterDate?: string): Promise<Workout[]> {
-  const url = filterDate ? `/api/workouts?date_filter=${filterDate}` : "api/workouts/";
+  const url = filterDate ? `api/workouts/?date_filter=${filterDate}` : "api/workouts/";
   const res = await api.get<Workout[]>(url, {
     headers: { Authorization: `Bearer ${token}` },
   });

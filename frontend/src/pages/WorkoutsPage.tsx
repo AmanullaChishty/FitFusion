@@ -8,6 +8,7 @@ export default function WorkoutsPage() {
     null
   );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [refreshSignal, setRefreshSignal] = useState<number>(0);
 
   const handleSelectWorkout = (id: string) => {
     console.log("Selected workout ID:", id);
@@ -21,6 +22,8 @@ export default function WorkoutsPage() {
   const handleWorkoutLogged = () => {
     setSuccessMessage("Workout logged successfully!");
     setTimeout(() => setSuccessMessage(null), 3000);
+    // Bump refresh signal so child lists re-fetch
+    setRefreshSignal((s) => s + 1);
   };
 
   return (
@@ -69,7 +72,7 @@ export default function WorkoutsPage() {
                 Tap a workout to see set details and analysis.
               </p>
               <div className="max-h-[480px] overflow-y-auto pr-1">
-                <WorkoutList onSelect={handleSelectWorkout} />
+                <WorkoutList onSelect={handleSelectWorkout} refreshSignal={refreshSignal} />
               </div>
             </section>
           </div>

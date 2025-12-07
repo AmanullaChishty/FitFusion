@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { getWorkouts, type Workout } from "../services/workoutService";
 
-export default function WorkoutList({ onSelect }: { onSelect: (id: string) => void }) {
+type Props = {
+  onSelect: (id: string) => void;
+  refreshSignal?: number;
+};
+
+export default function WorkoutList({ onSelect, refreshSignal }: Props) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [filterDate, setFilterDate] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +28,7 @@ export default function WorkoutList({ onSelect }: { onSelect: (id: string) => vo
       }
     };
     fetchData();
-  }, [filterDate]);
+  }, [filterDate, refreshSignal]);
 
   return (
     <div className="space-y-4">

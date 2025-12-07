@@ -20,14 +20,22 @@ async def log_workout(workout: WorkoutCreate, user: dict = Depends(get_current_u
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+from fastapi import Query
+
+
+# Support both /workouts/ and /workouts (no trailing slash)
 @router.get("/", response_model=List[WorkoutResponse])
-async def get_workouts(user: dict = Depends(get_current_user)):
+async def get_workouts(
+    user: dict = Depends(get_current_user),
+    date_filter: str = Query(None, description="Filter workouts by date (YYYY-MM-DD)")
+):
     """
-    Fetch all workouts for the authenticated user.
+    Fetch all workouts for the authenticated user, optionally filtered by date.
     """
-    print("Fetching workouts for user:", user["id"])
+    print("Fetching workouts for user:", user["id"], "with date_filter:", date_filter)
     try:
-        return await workout_service.fetch_workouts(user["id"])
+        return await workout_service.fetch_workouts(user["id"], date_filter)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
