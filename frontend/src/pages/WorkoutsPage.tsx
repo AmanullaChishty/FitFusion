@@ -2,12 +2,12 @@ import { useState } from "react";
 import LogWorkoutForm from "../components/LogWorkoutForm";
 import WorkoutList from "../components/WorkoutList";
 import WorkoutDetail from "../components/WorkoutDetail";
+import toast from "react-hot-toast";
 
 export default function WorkoutsPage() {
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(
     null
   );
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [refreshSignal, setRefreshSignal] = useState<number>(0);
 
   const handleSelectWorkout = (id: string) => {
@@ -20,8 +20,7 @@ export default function WorkoutsPage() {
   };
 
   const handleWorkoutLogged = () => {
-    setSuccessMessage("Workout logged successfully!");
-    setTimeout(() => setSuccessMessage(null), 3000);
+    toast.success("Workout logged successfully!");
     // Bump refresh signal so child lists re-fetch
     setRefreshSignal((s) => s + 1);
   };
@@ -42,12 +41,6 @@ export default function WorkoutsPage() {
           </div>
         </header>
 
-        {/* Success Alert */}
-        {successMessage && (
-          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
-            {successMessage}
-          </div>
-        )}
 
         {!selectedWorkoutId ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -1,28 +1,29 @@
 import { useEffect, useState } from "react";
-import { getWorkouts, type Workout } from "../services/workoutService";
+import { getWorkouts,deleteWorkout, type Workout } from "../services/workoutService";
+import toast from "react-hot-toast";
 
 type Props = {
   onSelect: (id: string) => void;
+  onEdit?: (workout: Workout) => void;
   refreshSignal?: number;
 };
 
-export default function WorkoutList({ onSelect, refreshSignal }: Props) {
+export default function WorkoutList({ onSelect, onEdit, refreshSignal }: Props) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [filterDate, setFilterDate] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null);
         const token = localStorage.getItem("token");
         if (!token) throw new Error("User not authenticated");
         const data = await getWorkouts(token, filterDate || undefined);
         setWorkouts(data);
       } catch (err: any) {
-        setError(err.message || "Failed to load workouts");
+        toast.error(err.message || "Failed to load workouts");
       } finally {
         setLoading(false);
       }
@@ -30,14 +31,26 @@ export default function WorkoutList({ onSelect, refreshSignal }: Props) {
     fetchData();
   }, [filterDate, refreshSignal]);
 
+  const handleDelete = async (id: string) => {
+    console.log("Delete workout", id);
+    const confirmDelete = window.confirm("Are you sure you want to delete this workout?");
+    if (!confirmDelete) return;
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("User not authenticated");
+        await deleteWorkout(token,id);
+        toast.success("Workout deleted successfully!");
+        // Refresh the list after deletion
+        setWorkouts((prev) => prev.filter((w) => w.id !== id));
+      } catch (err: any) {
+        toast.error(err.message || "Failed to delete workouts");
+      } finally {
+        setDeletingId(null);
+      }
+  };
+
   return (
     <div className="space-y-4">
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-          {error}
-        </div>
-      )}
 
       {/* Date Filter */}
       <div className="space-y-1">
@@ -76,7 +89,7 @@ export default function WorkoutList({ onSelect, refreshSignal }: Props) {
                 <th className="px-3 py-2 text-left">Exercise</th>
                 <th className="px-3 py-2 text-left">Sets / Reps</th>
                 <th className="px-3 py-2 text-left">Weight (kg)</th>
-                <th className="px-3 py-2 text-left">Action</th>
+                <th className="px-3 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -100,13 +113,33 @@ export default function WorkoutList({ onSelect, refreshSignal }: Props) {
                     {w.weight ?? "-"}
                   </td>
                   <td className="px-3 py-2 text-xs">
+                  {/* Desktop / tablet icon actions */}
+                  <div className="hidden items-center justify-end gap-2 md:flex">
+                    {/* Edit */}
                     <button
                       onClick={() => w.id && onSelect(w.id)}
-                      className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-slate-800"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-[13px] text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+                      aria-label="Edit workout"
+                      title="Edit workout"
+                      type="button"
                     >
-                      View
+                      ✏️
                     </button>
-                  </td>
+
+
+                    {/* Delete */}
+                    <button
+                      onClick={() => w.id && handleDelete(w.id)}
+                      disabled={deletingId === w.id}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-red-100 bg-red-50 text-[13px] text-red-600 shadow-sm hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label="Delete workout"
+                      title="Delete workout"
+                      type="button"
+                    >
+                      {deletingId === w.id ? "…" : "🗑"}
+                    </button>
+                  </div>
+                </td>
                 </tr>
               ))}
             </tbody>
@@ -115,10 +148,9 @@ export default function WorkoutList({ onSelect, refreshSignal }: Props) {
           {/* Mobile card list */}
           <div className="space-y-3 md:hidden">
             {workouts.map((w) => (
-              <button
+              <div
                 key={w.id}
-                onClick={() => w.id && onSelect(w.id)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left text-sm text-slate-800 shadow-sm hover:bg-slate-50"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left text-sm text-slate-800 shadow-sm"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div>
@@ -142,11 +174,33 @@ export default function WorkoutList({ onSelect, refreshSignal }: Props) {
                       {w.weight != null ? `${w.weight} kg` : "-"}
                     </span>
                   </span>
-                  <span className="text-[11px] text-emerald-700">
-                    Tap to view details →
-                  </span>
                 </div>
-              </button>
+
+                {/* Actions row */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => w.id && onSelect(w.id)}
+                    className="flex-1 rounded-xl bg-slate-900 px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-slate-800"
+                  >
+                    Edit
+                  </button>
+                  {/* <button
+                    type="button"
+                    onClick={() => onEdit && onEdit(w)}
+                    className="flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-center text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                  >
+                    Edit
+                  </button> */}
+                  <button
+                    type="button"
+                    disabled={deletingId === w.id}
+                    onClick={() => w.id && handleDelete(w.id)}
+                    className="flex-1 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-center text-xs font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {deletingId === w.id ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </>

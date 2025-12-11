@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { fetchProfile, updateProfile, type Profile } from "../services/api";
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const session = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) {
@@ -20,12 +19,11 @@ export default function ProfilePage() {
 
     const loadProfile = async () => {
       try {
-        setError(null);
         const data = await fetchProfile(token);
         setProfile(data);
       } catch (err) {
         console.error(err);
-        setError("Failed to load profile.");
+        toast.error("Failed to load profile.");
       } finally {
         setLoading(false);
       }
@@ -40,14 +38,12 @@ export default function ProfilePage() {
 
     try {
       setSaving(true);
-      setError(null);
-      setSuccess(null);
       const updated = await updateProfile(token, profile);
       setProfile(updated);
-      setSuccess("Profile updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (err) {
       console.error(err);
-      setError("Failed to update profile.");
+      toast.error("Failed to update profile.");
     } finally {
       setSaving(false);
     }
@@ -83,16 +79,6 @@ export default function ProfilePage() {
         </div>
 
         <div className="rounded-2xl border border-slate-100 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-6">
-          {error && (
-            <div className="mb-3 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-              {success}
-            </div>
-          )}
 
           <div className="space-y-4">
             {/* Username */}

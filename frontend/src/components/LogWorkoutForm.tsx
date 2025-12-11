@@ -1,6 +1,7 @@
 import { useState, useMemo  } from "react";
 import { createWorkout } from "../services/workoutService";
 import { EXERCISES_BY_BODY_PART, type BodyPart } from "../constants/exercises";
+import toast from "react-hot-toast";
 
 
 export default function LogWorkoutForm({ onSuccess }: { onSuccess: () => void }) {
@@ -9,7 +10,6 @@ export default function LogWorkoutForm({ onSuccess }: { onSuccess: () => void })
   const [reps, setReps] = useState<number>(0);
   const [weight, setWeight] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const bodyPartOrder: BodyPart[] = [
   "Chest",
@@ -55,7 +55,6 @@ export default function LogWorkoutForm({ onSuccess }: { onSuccess: () => void })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       const token = localStorage.getItem("token");
@@ -76,7 +75,7 @@ export default function LogWorkoutForm({ onSuccess }: { onSuccess: () => void })
 
       onSuccess();
     } catch (err: any) {
-      setError(err.message || "Failed to log workout");
+      toast.error(err.message || "Failed to log workout");
     } finally {
       setLoading(false);
     }
@@ -84,12 +83,6 @@ export default function LogWorkoutForm({ onSuccess }: { onSuccess: () => void })
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-          {error}
-        </div>
-      )}
 
       {/* Exercise Name */}
       <div className="space-y-1 relative">

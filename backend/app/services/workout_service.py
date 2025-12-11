@@ -60,3 +60,27 @@ async def update_workout(workout_id: str, user_id: str, update_data: Dict[str, A
     if getattr(response, "error", None):
         raise Exception(f"Supabase update error: {response.error}")
     return response.data[0] if response.data else None
+
+
+async def delete_workout(workout_id: str, user_id: str) -> bool:
+    """
+    Delete a workout owned by `user_id`. Returns True if a row was deleted.
+    """
+    response = (
+        supabase.table("workouts")
+        .delete()
+        .eq("id", workout_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    print("Supabase delete response:", response)
+    if getattr(response, "error", None):
+        raise Exception(f"Supabase delete error: {response.error}")
+    # If deleted rows are returned in `data`, treat that as success.
+    if response.data:
+        return True
+    # Some clients return a `count` attribute instead.
+    deleted_count = getattr(response, "count", None)
+    if deleted_count is not None:
+        return deleted_count > 0
+    return False
