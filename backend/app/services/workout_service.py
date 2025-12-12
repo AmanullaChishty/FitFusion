@@ -19,27 +19,47 @@ async def fetch_workouts(user_id: str, filtered_date: Optional[str] = None) -> L
     """
     Fetch all workouts for a specific user, optionally filtered by date (YYYY-MM-DD).
     """
-    print('user_id in fetch_workouts:', user_id, 'filtered_date:', filtered_date)
     query = supabase.table("workouts").select("*").eq("user_id", user_id)
     if filtered_date:
-        print("Applying date filter:", filtered_date)
-        # Build start and end of the day in ISO format
-        start_datetime = f"{filtered_date}T00:00:00Z"
-        # To get all times on the day, end is next day 00:00:00
         from datetime import datetime, timedelta
         try:
-            next_day = (datetime.strptime(filtered_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+            date_obj = datetime.strptime(filtered_date, "%Y-%m-%d")
+            start_datetime = f"{filtered_date}T00:00:00Z"
+            next_day = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
+            end_datetime = f"{next_day}T00:00:00Z"
+            query = query.gte("created_at", start_datetime).lt("created_at", end_datetime)
         except Exception as e:
-            print("Date parsing error:", e)
-            next_day = filtered_date
-        end_datetime = f"{next_day}T00:00:00Z"
-        query = query.gte("created_at", start_datetime).lt("created_at", end_datetime)
+            print("Invalid date_filter passed to fetch_workouts, ignoring filter:", e)
+            # Just don’t apply any created_at filter if parsing fails
+
     response = query.order("created_at", desc=True).execute()
     print("Supabase fetch response:", response)
-    # If Supabase returned an error, raise it. If no data was returned, just return an empty list.
+
     if getattr(response, "error", None):
         raise Exception(f"Supabase fetch error: {response.error}")
     return response.data or []
+
+async def fetch_workout_by_id(user_id: str, workout_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch a single workout by id for a specific user.
+    """
+    response = (
+        supabase.table("workouts")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("id", workout_id)
+        .single()
+        .execute()
+    )
+
+    if getattr(response, "error", None):
+        # Supabase returns an error if no row or other issue
+        # You can decide to return None on 406 "No rows" if you want
+        if getattr(response.error, "code", None) == "PGRST116":  # no rows
+            return None
+        raise Exception(f"Supabase fetch_by_id error: {response.error}")
+
+    return response.data
 
 async def update_workout(workout_id: str, user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """

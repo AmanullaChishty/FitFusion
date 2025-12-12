@@ -45,7 +45,7 @@ async def get_workout(workout_id: str, user: dict = Depends(get_current_user)):
     Fetch a single workout by ID for the authenticated user.
     """
     try:
-        workout = await workout_service.fetch_workout(workout_id, user["id"])
+        workout = await workout_service.fetch_workout_by_id(user["id"], workout_id)
         if not workout:
             raise HTTPException(status_code=404, detail="Workout not found")
         return workout
