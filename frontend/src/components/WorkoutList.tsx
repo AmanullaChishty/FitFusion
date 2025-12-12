@@ -4,11 +4,10 @@ import toast from "react-hot-toast";
 
 type Props = {
   onSelect: (id: string) => void;
-  onEdit?: (workout: Workout) => void;
   refreshSignal?: number;
 };
 
-export default function WorkoutList({ onSelect, onEdit, refreshSignal }: Props) {
+export default function WorkoutList({ onSelect, refreshSignal }: Props) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [filterDate, setFilterDate] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -184,13 +183,7 @@ export default function WorkoutList({ onSelect, onEdit, refreshSignal }: Props) 
                   >
                     Edit
                   </button>
-                  {/* <button
-                    type="button"
-                    onClick={() => onEdit && onEdit(w)}
-                    className="flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-center text-xs font-medium text-emerald-700 hover:bg-emerald-100"
-                  >
-                    Edit
-                  </button> */}
+                  
                   <button
                     type="button"
                     disabled={deletingId === w.id}
